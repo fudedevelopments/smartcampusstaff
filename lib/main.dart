@@ -11,12 +11,15 @@ import 'package:smartcampusstaff/bloc/registrationform.dart';
 import 'package:smartcampusstaff/bloc/userprofile_bloc.dart';
 import 'package:smartcampusstaff/components/authenticator_widget.dart';
 import 'package:smartcampusstaff/components/errorspage.dart';
+import 'package:smartcampusstaff/components/loadinguser.dart';
+import 'package:smartcampusstaff/components/pleasewaitPage.dart';
 import 'package:smartcampusstaff/firebase_options.dart';
 import 'package:smartcampusstaff/landing_page/landiing_bloc/landing_page_bloc.dart';
 import 'package:smartcampusstaff/landing_page/ui/landing_page.dart';
 import 'package:smartcampusstaff/models/ModelProvider.dart';
 import 'package:smartcampusstaff/utils/authservices.dart';
 import 'package:smartcampusstaff/utils/firebaseapi.dart';
+import 'package:get/get.dart';
 
 Future<void> _configureAmplify() async {
   try {
@@ -59,6 +62,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  AuthService authService = AuthService();
+
   @override
   void initState() {
     super.initState();
@@ -67,36 +72,24 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> fetchCurrentUserAttributes() async {
     try {
-      final result = await Amplify.Auth.fetchUserAttributes();
-
-      String? email;
-      String? sub;
-
-      for (final element in result) {
-        if (element.userAttributeKey.key == 'email') {
-          email = element.value;
-        } else if (element.userAttributeKey.key == 'sub') {
-          sub = element.value;
-        }
-      }
       BlocProvider.of<UserprofileBloc>(context)
-          .add(GetUserProfileEvent(email: email!, userid: sub!));
-    } on AuthException catch (e) {
-      safePrint('Error fetching user attributes: ${e.message}');
+          .add(GetUserProfileEvent(email: authService.email!, userid: authService.sub!));
+    } catch (e) {
+      ErrorPage(errorMessage: e.toString(), onRetry: () {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AuthenticatorWidget(
-      child: MaterialApp(
+      child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
         builder: Authenticator.builder(),
         home: BlocBuilder<UserprofileBloc, UserprofileState>(
           builder: (context, state) {
             if (state is UserProfileLoadingState) {
               return Center(
-                child: CircularProgressIndicator(),
+                child: UserLoadingIndicator(),
               );
             }
             if (state is UserProfileEmptyState) {
@@ -112,7 +105,9 @@ class _MyAppState extends State<MyApp> {
               return ErrorPage(errorMessage: state.error, onRetry: () {});
             } else {
               return Scaffold(
-                body: Center(child: Text("Please Wait Your State is Loading")),
+                body: PleaseWaitPage(
+                  message: "Please Wait We are Getting Your Data",
+                ),
               );
             }
           },

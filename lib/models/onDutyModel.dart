@@ -441,7 +441,7 @@ class onDutyModel extends amplify_core.Model {
       _eventname = json['eventname'],
       _details = json['details'],
       _location = json['location'],
-      _date = json['date'].toString(),
+      _date = json['date'],
       _registeredUrl = json['registeredUrl'],
       _validDocuments = json['validDocuments']?.cast<String>(),
       _proctorstatus = json['proctorstatus'],
@@ -511,7 +511,8 @@ class onDutyModel extends amplify_core.Model {
         provider: amplify_core.AuthRuleProvider.USERPOOLS,
         operations: const [
           amplify_core.ModelOperation.CREATE,
-          amplify_core.ModelOperation.READ
+          amplify_core.ModelOperation.READ,
+          amplify_core.ModelOperation.DELETE
         ]),
       amplify_core.AuthRule(
         authStrategy: amplify_core.AuthStrategy.GROUPS,
@@ -527,6 +528,7 @@ class onDutyModel extends amplify_core.Model {
     ];
     
     modelSchemaDefinition.indexes = [
+      amplify_core.ModelIndex(fields: const ["student", "createdAt"], name: "onDutyModelsByStudentAndCreatedAt"),
       amplify_core.ModelIndex(fields: const ["Proctor", "createdAt"], name: "onDutyModelsByProctorAndCreatedAt"),
       amplify_core.ModelIndex(fields: const ["Ac", "createdAt"], name: "onDutyModelsByAcAndCreatedAt"),
       amplify_core.ModelIndex(fields: const ["Hod", "createdAt"], name: "onDutyModelsByHodAndCreatedAt")

@@ -11,11 +11,10 @@ class AuthService {
   String? _email;
   String? _sub;
 
-  /// Getters to access values globally
   String? get idToken => _idToken;
   String? get email => _email;
   String? get sub => _sub;
-
+  
   /// Fetch ID Token and store it
   Future<void> fetchIdToken() async {
     try {
@@ -32,8 +31,7 @@ class AuthService {
       print('Error retrieving auth session: ${e.message}');
     }
   }
-
-  /// Fetch User Attributes (Email and Sub)
+  
   Future<void> fetchUserAttributes() async {
     try {
       final result = await Amplify.Auth.fetchUserAttributes();

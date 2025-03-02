@@ -1,3 +1,4 @@
+import 'package:amplify_authenticator/amplify_authenticator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smartcampusstaff/bloc/userprofile_bloc.dart';
@@ -62,6 +63,17 @@ class StaffRegistrationForm extends StatelessWidget {
                   _buildQualificationField(),
                   SizedBox(height: 32),
                   _buildSubmitButton(context),
+                  SizedBox(height: 60),
+                  Text(
+                    'You are Logged in Wrong Email',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 20),
+                  SignOutButton(),
                 ],
               ),
             ),

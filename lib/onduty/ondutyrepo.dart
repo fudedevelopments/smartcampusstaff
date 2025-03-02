@@ -4,10 +4,6 @@ import 'package:smartcampusstaff/models/onDutyModel.dart';
 
 
 class Ondutyrepo {
-  ondutyList() async {
- 
-  }
-
   Future<GraphQLResponse> ondutyCreate({required onDutyModel onduty}) async {
     try {
       final ondutyrequest = ModelMutations.create(onduty);

@@ -46,7 +46,7 @@ class OndutyUI extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    reload(); // Fetch initial data
+    reload();
 
     return Scaffold(
       appBar: AppBar(
@@ -96,11 +96,12 @@ class OndutyUI extends StatelessWidget {
     return Obx(() => ElevatedButton(
           onPressed: () {
             selectedCategory.value = category;
-            reload(); // Call reload when category changes
+            reload(); 
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor:
-                selectedCategory.value == category ? Colors.blue : Colors.grey,
+            backgroundColor: selectedCategory.value == category
+                ? Colors.orangeAccent
+                : Colors.grey,
           ),
           child: Text(category),
         ));

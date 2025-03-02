@@ -15,9 +15,9 @@ List<BottomNavigationBarItem> bottomnavItem = [
 ];
 
 List<Widget> bottomnaviScreen = [
-  const Home(),
+   Home(),
   OndutyUI(),
-  const Profileui()
+  UserProfilePage(),
 ];
 
 class LandingPage extends StatelessWidget {
@@ -30,12 +30,12 @@ class LandingPage extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(56.0), 
+            preferredSize: const Size.fromHeight(56.0),
             child: Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.orange, 
+                    Colors.orange,
                     Colors.deepOrange,
                   ],
                   begin: Alignment.topLeft,

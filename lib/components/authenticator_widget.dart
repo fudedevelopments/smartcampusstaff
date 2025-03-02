@@ -2,7 +2,6 @@ import 'package:amplify_authenticator/amplify_authenticator.dart';
 import 'package:flutter/material.dart';
 import 'package:smartcampusstaff/components/customscaffold.dart';
 
-
 class AuthenticatorWidget extends StatelessWidget {
   final Widget child;
   const AuthenticatorWidget({super.key, required this.child});
@@ -49,5 +48,3 @@ class AuthenticatorWidget extends StatelessWidget {
     );
   }
 }
-
-
