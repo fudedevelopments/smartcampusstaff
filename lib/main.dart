@@ -67,15 +67,13 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    fetchCurrentUserAttributes();
-  }
 
-  Future<void> fetchCurrentUserAttributes() async {
-    try {
-      BlocProvider.of<UserprofileBloc>(context)
-          .add(GetUserProfileEvent(email: authService.email!, userid: authService.sub!));
-    } catch (e) {
-      ErrorPage(errorMessage: e.toString(), onRetry: () {});
+    // Only trigger the bloc if the user is signed in and has email and sub
+    if (authService.isSignedIn &&
+        authService.email != null &&
+        authService.sub != null) {
+      BlocProvider.of<UserprofileBloc>(context).add(GetUserProfileEvent(
+          email: authService.email!, userid: authService.sub!));
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:amplify_authenticator/amplify_authenticator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smartcampusstaff/bloc/registrationform.dart';
 import 'package:smartcampusstaff/bloc/userprofile_bloc.dart';
 import 'package:smartcampusstaff/components/errorspage.dart';
 
@@ -68,8 +69,34 @@ class UserProfilePage extends StatelessWidget {
 
                       SizedBox(height: 20),
                       // Edit Profile Button
-                      ElevatedButton(
-                        onPressed: () {},
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => StaffRegistrationForm(
+                                userid: state.userProfile.id,
+                                email: state.userProfile.email,
+                                existingProfile: state.userProfile,
+                                isEditing: true,
+                              ),
+                            ),
+                          );
+                          if (result == true) {
+                            // Profile was updated, refresh the data
+                            BlocProvider.of<UserprofileBloc>(context).add(
+                              GetUserProfileEvent(
+                                email: state.userProfile.email,
+                                userid: state.userProfile.id,
+                              ),
+                            );
+                          }
+                        },
+                        icon: Icon(Icons.edit, color: Colors.white),
+                        label: Text(
+                          "Edit Profile",
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent.shade700,
                           shape: RoundedRectangleBorder(
@@ -77,10 +104,6 @@ class UserProfilePage extends StatelessWidget {
                           ),
                           padding: EdgeInsets.symmetric(
                               horizontal: 40, vertical: 12),
-                        ),
-                        child: Text(
-                          "Edit Profile",
-                          style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
                       ),
 

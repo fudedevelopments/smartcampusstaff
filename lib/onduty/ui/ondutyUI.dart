@@ -49,62 +49,157 @@ class OndutyUI extends StatelessWidget {
     reload();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("On Duty List"),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildCategoryButton("Proctor"),
-                _buildCategoryButton("Academic Coordinator"),
-                _buildCategoryButton("HOD"),
-              ],
+      body: Container(
+        color: Colors.grey[50],
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Permission Requests',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildCategoryButton("Proctor", context),
+                        const SizedBox(width: 12),
+                        _buildCategoryButton("Academic Coordinator", context),
+                        const SizedBox(width: 12),
+                        _buildCategoryButton("HOD", context),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return ListView.builder(
-                controller: _scrollController,
-                itemCount: controller.onDutyList.length +
-                    (controller.isFetchingMore.value ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == controller.onDutyList.length) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  final onDuty = controller.onDutyList[index];
-                  return StatusCard(
-                    index: selectedCategory.string,
-                    onDutyModel: onDuty,
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
-                },
-              );
-            }),
-          ),
-        ],
+                }
+                if (controller.onDutyList.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.assignment_outlined,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No permission requests found',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return RefreshIndicator(
+                  onRefresh: reload,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: controller.onDutyList.length +
+                        (controller.isFetchingMore.value ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == controller.onDutyList.length) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      final onDuty = controller.onDutyList[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: StatusCard(
+                          index: selectedCategory.string,
+                          onDutyModel: onDuty,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildCategoryButton(String category) {
-    return Obx(() => ElevatedButton(
-          onPressed: () {
+  Widget _buildCategoryButton(String category, BuildContext context) {
+    return Obx(() {
+      final isSelected = selectedCategory.value == category;
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
             selectedCategory.value = category;
-            reload(); 
+            reload();
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: selectedCategory.value == category
-                ? Colors.orangeAccent
-                : Colors.grey,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              color: isSelected ? Theme.of(context).primaryColor : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey.shade300,
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: Theme.of(context).primaryColor.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Text(
+              category,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.grey.shade700,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                fontSize: 14,
+              ),
+            ),
           ),
-          child: Text(category),
-        ));
+        ),
+      );
+    });
   }
 
   String _getIndexName(String category) {

@@ -1,14 +1,32 @@
+import 'dart:async';
 import 'package:amplify_authenticator/amplify_authenticator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smartcampusstaff/bloc/repo/userprofilerepo.dart';
 import 'package:smartcampusstaff/bloc/userprofile_bloc.dart';
 import 'package:smartcampusstaff/models/ModelProvider.dart';
 import 'package:smartcampusstaff/utils/firebaseapi.dart';
 import 'package:smartcampusstaff/utils/utils.dart';
 
-class StaffRegistrationForm extends StatelessWidget {
+class StaffRegistrationForm extends StatefulWidget {
   final String userid;
   final String email;
+  final StaffUserProfile? existingProfile;
+  final bool isEditing;
+
+  StaffRegistrationForm({
+    super.key,
+    required this.userid,
+    required this.email,
+    this.existingProfile,
+    this.isEditing = false,
+  });
+
+  @override
+  State<StaffRegistrationForm> createState() => _StaffRegistrationFormState();
+}
+
+class _StaffRegistrationFormState extends State<StaffRegistrationForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -16,12 +34,39 @@ class StaffRegistrationForm extends StatelessWidget {
   final TextEditingController _qualificationController =
       TextEditingController();
 
-  StaffRegistrationForm({super.key, required this.userid, required this.email});
+  bool _isLoading = false;
+  bool _isRegistered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.text = widget.email;
+    if (widget.existingProfile != null) {
+      _nameController.text = widget.existingProfile!.name;
+      _departmentController.text = widget.existingProfile!.department;
+      _qualificationController.text = widget.existingProfile!.qualification;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.blue[800]),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          widget.isEditing ? 'Edit Profile' : 'Staff Registration',
+          style: TextStyle(
+            color: Colors.blue[800],
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24),
         child: Center(
@@ -44,16 +89,18 @@ class StaffRegistrationForm extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Staff Registration',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue[800],
+                  if (!widget.isEditing) ...[
+                    Text(
+                      'Staff Registration',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[800],
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 32),
+                    SizedBox(height: 32),
+                  ],
                   _buildNameField(),
                   SizedBox(height: 24),
                   _buildEmailField(),
@@ -62,18 +109,22 @@ class StaffRegistrationForm extends StatelessWidget {
                   SizedBox(height: 24),
                   _buildQualificationField(),
                   SizedBox(height: 32),
-                  _buildSubmitButton(context),
-                  SizedBox(height: 60),
-                  Text(
-                    'You are Logged in Wrong Email',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
+                  _isRegistered
+                      ? _buildContinueButton(context)
+                      : _buildSubmitButton(context),
+                  if (!widget.isEditing) ...[
+                    SizedBox(height: 60),
+                    Text(
+                      'You are Logged in Wrong Email',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.red,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 20),
-                  SignOutButton(),
+                    SizedBox(height: 20),
+                    SignOutButton(),
+                  ],
                 ],
               ),
             ),
@@ -106,6 +157,7 @@ class StaffRegistrationForm extends StatelessWidget {
   Widget _buildEmailField() {
     return TextFormField(
       controller: _emailController,
+      enabled: false, // Email should not be editable
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         labelText: 'Email Address',
@@ -114,6 +166,8 @@ class StaffRegistrationForm extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.blue[800]!),
         ),
+        filled: true,
+        fillColor: Colors.grey[100],
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -173,51 +227,117 @@ class StaffRegistrationForm extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      onPressed: () {
-        final firebasetoken = FirebaseApi().token;
-        if (_formKey.currentState!.validate()) {
-          if (firebasetoken != null) {
-            BlocProvider.of<UserprofileBloc>(context).add(
-                UserprofileCreateEvent(
-                    userProfile: StaffUserProfile(
-                        id: userid,
-                        name: _nameController.text,
-                        email: _emailController.text,
-                        department: _departmentController.text,
-                        qualification: _qualificationController.text,
-                        deviceToken: firebasetoken)));
-          }
-        }
-      },
-      child: BlocConsumer<UserprofileBloc, UserprofileState>(
-        listener: (context, state) {
-          if (state is CreateUserProfilestaffsuccessState) {
-            showsnakbar(context, "You Profile Registered SuccessFully");
-            BlocProvider.of<UserprofileBloc>(context)
-                .add(GetUserProfileEvent(email: email, userid: userid));
-          }
-          if (state is CreateUserProfilestaffFailedState) {
-            showsnakbar(context, state.error);
-          }
-        },
-        builder: (context, state) {
-          if (state is CreateUserProfilestaffLoadingState) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          } else {
-            return Text(
-              'REGISTER STAFF',
+      onPressed: _isLoading ? null : _handleSubmit,
+      child: _isLoading
+          ? SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+          : Text(
+              widget.isEditing ? 'UPDATE PROFILE' : 'REGISTER STAFF',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
               ),
-            );
-          }
-        },
-      ),
+            ),
     );
+  }
+
+  Widget _buildContinueButton(BuildContext context) {
+    return Column(
+      children: [
+        Icon(
+          Icons.check_circle,
+          color: Colors.green,
+          size: 48,
+        ),
+        SizedBox(height: 16),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            padding: EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          onPressed: () {
+            BlocProvider.of<UserprofileBloc>(context).add(
+              GetUserProfileEvent(
+                email: widget.email,
+                userid: widget.userid,
+              ),
+            );
+            Navigator.of(context).pop(true);
+          },
+          child: Text(
+            'CONTINUE',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleSubmit() async {
+    final firebasetoken = FirebaseApi().token;
+    if (_formKey.currentState!.validate()) {
+      if (firebasetoken != null) {
+        setState(() {
+          _isLoading = true;
+        });
+
+        try {
+          final userProfile = StaffUserProfile(
+            id: widget.userid,
+            name: _nameController.text,
+            email: _emailController.text,
+            department: _departmentController.text,
+            qualification: _qualificationController.text,
+            deviceToken: firebasetoken,
+          );
+
+          if (widget.isEditing) {
+            await UserProfileRepo()
+                .updateUserProfileStaff(userprofile: userProfile);
+            showsnakbar(context, "Profile Updated Successfully");
+            Navigator.of(context).pop(true);
+          } else {
+            await UserProfileRepo()
+                .createUserProfileStaff(userprofile: userProfile);
+            setState(() {
+              _isLoading = false;
+              _isRegistered = true;
+            });
+            showsnakbar(context, "Your Profile Registered Successfully");
+          }
+
+          // Refresh the profile data
+          BlocProvider.of<UserprofileBloc>(context).add(
+            GetUserProfileEvent(
+              email: widget.email,
+              userid: widget.userid,
+            ),
+          );
+        } catch (e) {
+          setState(() {
+            _isLoading = false;
+          });
+          showsnakbar(context, e.toString());
+        }
+      } else {
+        showsnakbar(context, "Device token not available. Please try again.");
+      }
+    }
   }
 }

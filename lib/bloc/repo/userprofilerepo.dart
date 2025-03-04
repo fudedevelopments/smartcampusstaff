@@ -41,4 +41,19 @@ class UserProfileRepo {
       throw Exception("Failed to create user profile. Please try again.");
     }
   }
+
+  Future<void> updateUserProfileStaff(
+      {required StaffUserProfile userprofile}) async {
+    try {
+      final updateStaffUser = ModelMutations.update(userprofile);
+      final response =
+          await Amplify.API.mutate(request: updateStaffUser).response;
+
+      if (response.errors.isNotEmpty) {
+        throw Exception("API Error: ${response.errors.first.message}");
+      }
+    } catch (e) {
+      throw Exception("Failed to update user profile. Please try again.");
+    }
+  }
 }

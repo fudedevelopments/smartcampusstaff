@@ -18,14 +18,42 @@ class StatusCard extends StatelessWidget {
     required this.index,
   });
 
+  String _getStatusText() {
+    switch (index) {
+      case "Proctor":
+        return onDutyModel.proctorStatus.toUpperCase();
+      case "Academic Coordinator":
+        return onDutyModel.acStatus.toUpperCase();
+      case "HOD":
+        return onDutyModel.hodStatus.toUpperCase();
+      default:
+        return "PENDING";
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case "APPROVED":
+        return Colors.green;
+      case "REJECTED":
+        return Colors.red;
+      default:
+        return Colors.orange;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final status = _getStatusText();
+    final statusColor = _getStatusColor(status);
+
     return GestureDetector(
       onTap: () async {
         final result = await navigationpush(
-            context, DetailsOnduty(index: index, model: onDutyModel));
+          context,
+          DetailsOnduty(index: index, model: onDutyModel),
+        );
         if (result == true) {
-          // Refresh the data when returning from details page
           final ondutyController = Get.find<OndutyController>();
           ondutyController.fetchData(
             tablename: "onDutyModel-2jskpek75veajd4yfnqjmkppmu-NONE",
@@ -38,107 +66,113 @@ class StatusCard extends StatelessWidget {
         }
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.orange.shade100.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.orange.shade600, Colors.yellow.shade700],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(14),
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
                 ),
               ),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
+                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.request_page,
-                      color: Colors.white,
+                    child: Icon(
+                      Icons.event_note_rounded,
+                      color: Theme.of(context).primaryColor,
                       size: 24,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          onDutyModel.eventName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          onDutyModel.details,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     child: Text(
-                      'Request: ${onDutyModel.eventName}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                      status,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
             ),
-            // Content
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildInfoTile(
-                    icon: Icons.person,
-                    label: 'Requested by',
-                    value: onDutyModel.name,
-                    color: Colors.orange.shade700,
+                  _buildInfoRow(
+                    context,
+                    Icons.person_outline_rounded,
+                    onDutyModel.name,
+                    onDutyModel.regNo,
                   ),
                   const SizedBox(height: 12),
-                  _buildInfoTile(
-                    icon: Icons.badge,
-                    label: 'Reg No',
-                    value: onDutyModel.regNo,
-                    color: Colors.orange.shade700,
+                  _buildInfoRow(
+                    context,
+                    Icons.location_on_outlined,
+                    onDutyModel.location,
+                    onDutyModel.date,
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _buildInfoTile(
-                          icon: Icons.calendar_today,
-                          label: 'Date',
-                          value: onDutyModel.date,
-                          color: Colors.yellow.shade800,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildInfoTile(
-                          icon: Icons.location_on,
-                          label: 'Location',
-                          value: onDutyModel.location,
-                          color: Colors.yellow.shade800,
-                        ),
-                      ),
-                    ],
-                  ),
+                  if (onDutyModel.validDocuments.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _buildAttachmentRow(context),
+                  ],
                 ],
               ),
             ),
@@ -148,25 +182,24 @@ class StatusCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoTile({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+  ) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(6),
+            color: Theme.of(context).primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
             size: 20,
-            color: color,
+            color: Theme.of(context).primaryColor,
           ),
         ),
         const SizedBox(width: 12),
@@ -175,23 +208,49 @@ class StatusCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade600,
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  color: Colors.black87,
                 ),
               ),
-              const SizedBox(height: 2),
               Text(
-                value,
+                subtitle,
                 style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade900,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: Colors.grey[600],
                 ),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAttachmentRow(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.attach_file_rounded,
+            size: 20,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          '${onDutyModel.validDocuments.length} attachment(s)',
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
           ),
         ),
       ],

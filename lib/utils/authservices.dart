@@ -10,18 +10,19 @@ class AuthService {
   String? _idToken;
   String? _email;
   String? _sub;
+  bool _isSignedIn = false;
 
   String? get idToken => _idToken;
   String? get email => _email;
   String? get sub => _sub;
-  
-  /// Fetch ID Token and store it
+  bool get isSignedIn => _isSignedIn;
+
   Future<void> fetchIdToken() async {
     try {
       final result =
           await Amplify.Auth.fetchAuthSession() as CognitoAuthSession;
-
-      if (result.isSignedIn) {
+      _isSignedIn = result.isSignedIn;
+      if (_isSignedIn) {
         _idToken = result.userPoolTokensResult.value.idToken.raw;
         print('ID Token fetched successfully');
       } else {
@@ -31,7 +32,7 @@ class AuthService {
       print('Error retrieving auth session: ${e.message}');
     }
   }
-  
+
   Future<void> fetchUserAttributes() async {
     try {
       final result = await Amplify.Auth.fetchUserAttributes();
@@ -43,7 +44,6 @@ class AuthService {
           _sub = element.value;
         }
       }
-
       print('User attributes fetched successfully');
     } on AuthException catch (e) {
       print('Error fetching user attributes: ${e.message}');
