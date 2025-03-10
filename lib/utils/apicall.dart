@@ -14,6 +14,17 @@ class OndutyController extends GetxController {
   var isLoading = false.obs;
   var isFetchingMore = false.obs;
 
+  // Track the current category to avoid redundant API calls
+  var currentCategory = ''.obs;
+  var dataLoaded = false.obs;
+
+  // Check if data needs to be loaded for the given category
+  bool needsDataRefresh(String category, String partitionKeyValue) {
+    return onDutyList.isEmpty ||
+        currentCategory.value != category ||
+        !dataLoaded.value;
+  }
+
   Future<void> fetchData({
     required String tablename,
     required String indexname,
@@ -22,7 +33,15 @@ class OndutyController extends GetxController {
     required String partitionKey,
     required String partitionKeyValue,
     bool isPagination = false,
+    bool forceRefresh = false,
   }) async {
+    // Skip if data is already loaded for this category and not forcing refresh
+    if (!forceRefresh &&
+        !isPagination &&
+        !needsDataRefresh(partitionKey, partitionKeyValue)) {
+      return;
+    }
+
     if (isPagination && lastEvaluatedKey.value == null) return;
 
     try {
@@ -30,6 +49,11 @@ class OndutyController extends GetxController {
         isFetchingMore.value = true;
       } else {
         isLoading.value = true;
+        // Clear existing data when loading a new category
+        if (currentCategory.value != partitionKey) {
+          onDutyList.clear();
+          lastEvaluatedKey.value = null;
+        }
       }
 
       final response = await _dio.get(
@@ -60,21 +84,46 @@ class OndutyController extends GetxController {
         lastEvaluatedKey.value = null;
       }
 
-      List<OnDutyModel> newData =
-          jsonResponse.map((e) => OnDutyModel.fromMap(e)).toList();
       if (isPagination) {
-        onDutyList.addAll(newData); 
+        onDutyList.addAll(
+            jsonResponse.map((item) => OnDutyModel.fromMap(item)).toList());
       } else {
-        onDutyList.assignAll(newData);
+        onDutyList.value =
+            jsonResponse.map((item) => OnDutyModel.fromMap(item)).toList();
       }
-    } on DioException catch (e) {
-      print("DioError: ${e.response?.statusCode} - ${e.response?.data}");
+
+      // Update tracking variables
+      currentCategory.value = partitionKey;
+      dataLoaded.value = true;
     } catch (e) {
-      print('Error: $e');
+      safePrint('Error fetching data: $e');
     } finally {
-      isLoading.value = false;
-      isFetchingMore.value = false;
+      if (isPagination) {
+        isFetchingMore.value = false;
+      } else {
+        isLoading.value = false;
+      }
     }
+  }
+
+  // Method to force a refresh of data
+  Future<void> refreshData({
+    required String tablename,
+    required String indexname,
+    required String token,
+    required int limit,
+    required String partitionKey,
+    required String partitionKeyValue,
+  }) async {
+    return fetchData(
+      tablename: tablename,
+      indexname: indexname,
+      token: token,
+      limit: limit,
+      partitionKey: partitionKey,
+      partitionKeyValue: partitionKeyValue,
+      forceRefresh: true,
+    );
   }
 
   bool hasMoreData() => lastEvaluatedKey.value != null;
@@ -94,7 +143,7 @@ class OndutyController extends GetxController {
     };
 
     try {
-       await dio.put(
+      await dio.put(
         url,
         data: data,
         options: Options(
@@ -135,7 +184,6 @@ class OndutyController extends GetxController {
           },
         ),
       );
- 
     } catch (e) {
       safePrint("Error making request: $e");
       rethrow;

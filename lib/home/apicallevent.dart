@@ -27,8 +27,6 @@ Future<GraphQLResponse> createEvent(Events eventModel) async {
   }
 }
 
-
-
 class EventController extends GetxController {
   final Dio _dio = Dio();
   final String baseUrl =
@@ -39,6 +37,7 @@ class EventController extends GetxController {
   var isLoading = false.obs;
   var isFetchingMore = false.obs;
   var eventList = <EventModel>[].obs;
+  var dataLoaded = false.obs;
 
   // Stored fetch parameters
   String? _tablename;
@@ -54,6 +53,11 @@ class EventController extends GetxController {
     // Optionally call reload here if parameters are set
   }
 
+  // Check if data needs to be loaded
+  bool needsDataRefresh() {
+    return eventList.isEmpty || !dataLoaded.value;
+  }
+
   // Reload function using stored parameters
   Future<void> reload() async {
     if (_tablename == null ||
@@ -62,13 +66,15 @@ class EventController extends GetxController {
         _limit == null ||
         _partitionKey == null ||
         _partitionKeyValue == null) {
-      print("Error: Fetch parameters not set. Call fetchData first.");
+      safePrint("Error: Fetch parameters not set. Call fetchData first.");
       return;
     }
 
     // Reset pagination and list
     lastEvaluatedKey.value = null;
     eventList.clear();
+    dataLoaded.value = false;
+
     // Fetch initial data with stored parameters
     await fetchData(
       tablename: _tablename!,
@@ -78,6 +84,7 @@ class EventController extends GetxController {
       partitionKey: _partitionKey!,
       partitionKeyValue: _partitionKeyValue!,
       isPagination: false,
+      forceRefresh: true,
     );
   }
 
@@ -90,6 +97,7 @@ class EventController extends GetxController {
     required String partitionKey,
     required String partitionKeyValue,
     bool isPagination = false,
+    bool forceRefresh = false,
   }) async {
     // Store parameters on first call or if they change
     _tablename = tablename;
@@ -98,6 +106,11 @@ class EventController extends GetxController {
     _limit = limit;
     _partitionKey = partitionKey;
     _partitionKeyValue = partitionKeyValue;
+
+    // Skip if data is already loaded and not forcing refresh or paginating
+    if (!forceRefresh && !isPagination && !needsDataRefresh()) {
+      return;
+    }
 
     if (isPagination && lastEvaluatedKey.value == null) return; // No more data
 
@@ -141,17 +154,40 @@ class EventController extends GetxController {
       } else {
         eventList.assignAll(newData); // Replace existing data
       }
-      if (eventList.isNotEmpty) {
-        print(eventList[0].eventName);
-      }
+
+      // Mark data as loaded
+      dataLoaded.value = true;
     } on DioException catch (e) {
-      print("DioError: ${e.response?.statusCode} - ${e.response?.data}");
+      safePrint("DioError: ${e.response?.statusCode} - ${e.response?.data}");
     } catch (e) {
-      print('Error: $e');
+      safePrint('Error: $e');
     } finally {
       isLoading.value = false;
       isFetchingMore.value = false;
     }
+  }
+
+  // Method to force a refresh of data
+  Future<void> refreshData() async {
+    if (_tablename == null ||
+        _indexname == null ||
+        _token == null ||
+        _limit == null ||
+        _partitionKey == null ||
+        _partitionKeyValue == null) {
+      safePrint("Error: Fetch parameters not set. Call fetchData first.");
+      return;
+    }
+
+    await fetchData(
+      tablename: _tablename!,
+      indexname: _indexname!,
+      token: _token!,
+      limit: _limit!,
+      partitionKey: _partitionKey!,
+      partitionKeyValue: _partitionKeyValue!,
+      forceRefresh: true,
+    );
   }
 
   bool hasMoreData() => lastEvaluatedKey.value != null;

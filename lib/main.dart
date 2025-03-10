@@ -19,6 +19,7 @@ import 'package:smartcampusstaff/landing_page/ui/landing_page.dart';
 import 'package:smartcampusstaff/models/ModelProvider.dart';
 import 'package:smartcampusstaff/utils/authservices.dart';
 import 'package:smartcampusstaff/utils/firebaseapi.dart';
+import 'package:smartcampusstaff/utils/image_cache_service.dart';
 import 'package:get/get.dart';
 
 Future<void> _configureAmplify() async {
@@ -36,6 +37,10 @@ Future<void> _configureAmplify() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Clear image caches on app start to prevent stale images
+  ImageCacheService().clearAllCaches();
+
   await _configureAmplify();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirebaseApi().initNotification();

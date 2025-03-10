@@ -4,14 +4,33 @@ import 'package:smartcampusstaff/components/statuscard.dart';
 import 'package:smartcampusstaff/utils/apicall.dart';
 import 'package:smartcampusstaff/utils/authservices.dart';
 
-class OndutyUI extends StatelessWidget {
+class OndutyUI extends StatefulWidget {
+  const OndutyUI({super.key});
+
+  @override
+  State<OndutyUI> createState() => _OndutyUIState();
+}
+
+class _OndutyUIState extends State<OndutyUI> {
   final OndutyController controller = Get.put(OndutyController());
   final ScrollController _scrollController = ScrollController();
   final AuthService authService = AuthService();
   final RxString selectedCategory = 'Proctor'.obs;
 
-  OndutyUI({super.key}) {
+  @override
+  void initState() {
+    super.initState();
     _setupScrollListener();
+    // Load data only once when the widget is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      reload();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _setupScrollListener() {
@@ -32,21 +51,34 @@ class OndutyUI extends StatelessWidget {
     });
   }
 
-  Future<void> reload() async {
+  Future<void> reload({bool forceRefresh = false}) async {
     String indexName = _getIndexName(selectedCategory.value);
-    await controller.fetchData(
-      tablename: "onDutyModel-2jskpek75veajd4yfnqjmkppmu-NONE",
-      indexname: indexName,
-      token: authService.idToken!,
-      limit: 5,
-      partitionKey: _getPartitionKey(selectedCategory.value),
-      partitionKeyValue: authService.sub!,
-    );
+    String partitionKey = _getPartitionKey(selectedCategory.value);
+
+    if (forceRefresh) {
+      await controller.refreshData(
+        tablename: "onDutyModel-2jskpek75veajd4yfnqjmkppmu-NONE",
+        indexname: indexName,
+        token: authService.idToken!,
+        limit: 5,
+        partitionKey: partitionKey,
+        partitionKeyValue: authService.sub!,
+      );
+    } else {
+      await controller.fetchData(
+        tablename: "onDutyModel-2jskpek75veajd4yfnqjmkppmu-NONE",
+        indexname: indexName,
+        token: authService.idToken!,
+        limit: 5,
+        partitionKey: partitionKey,
+        partitionKeyValue: authService.sub!,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    reload();
+    // Removed reload() call from here to prevent repeated API calls
 
     return Scaffold(
       body: Container(
@@ -123,7 +155,7 @@ class OndutyUI extends StatelessWidget {
                   );
                 }
                 return RefreshIndicator(
-                  onRefresh: reload,
+                  onRefresh: () => reload(forceRefresh: true),
                   child: ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
@@ -164,8 +196,10 @@ class OndutyUI extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            selectedCategory.value = category;
-            reload();
+            if (selectedCategory.value != category) {
+              selectedCategory.value = category;
+              reload(forceRefresh: false); // Use cached data if available
+            }
           },
           borderRadius: BorderRadius.circular(12),
           child: Container(

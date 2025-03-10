@@ -11,12 +11,68 @@ import 'package:smartcampusstaff/models/Events.dart';
 import 'package:smartcampusstaff/utils/authservices.dart';
 import 'package:smartcampusstaff/utils/utils.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   final EventController controller = Get.put(EventController());
   final ScrollController _scrollController = ScrollController();
   final AuthService authService = AuthService();
 
-  Home({super.key});
+  @override
+  void initState() {
+    super.initState();
+
+    // Setup scroll listener
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+              _scrollController.position.maxScrollExtent &&
+          !controller.isFetchingMore.value) {
+        controller.fetchData(
+          tablename: "Events-2jskpek75veajd4yfnqjmkppmu-NONE",
+          indexname: "eventsByModelAndCreatedAt",
+          token: authService.idToken!,
+          limit: 5,
+          partitionKey: "model",
+          partitionKeyValue: "Events",
+          isPagination: true,
+        );
+      }
+    });
+
+    // Initial data fetch
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadData();
+    });
+  }
+
+  // Method to load initial data
+  void loadData() {
+    controller.fetchData(
+      tablename: "Events-2jskpek75veajd4yfnqjmkppmu-NONE",
+      indexname: "eventsByModelAndCreatedAt",
+      token: authService.idToken!,
+      limit: 5,
+      partitionKey: "model",
+      partitionKeyValue: "Events",
+      isPagination: false,
+    );
+  }
+
+  // Method to refresh data (can be called from outside)
+  void refreshData() {
+    controller.refreshData();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   // Function to show delete confirmation dialog
   Future<void> _showDeleteConfirmationDialog(
@@ -58,40 +114,12 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initial fetch with parameters
-    controller.fetchData(
-      tablename: "Events-2jskpek75veajd4yfnqjmkppmu-NONE",
-      indexname: "eventsByModelAndCreatedAt",
-      token: authService.idToken!,
-      limit: 5,
-      partitionKey: "model",
-      partitionKeyValue: "Events",
-      isPagination: false,
-    );
-
-    // Pagination listener
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-              _scrollController.position.maxScrollExtent &&
-          !controller.isFetchingMore.value) {
-        controller.fetchData(
-          tablename: "Events-2jskpek75veajd4yfnqjmkppmu-NONE",
-          indexname: "eventsByModelAndCreatedAt",
-          token: authService.idToken!,
-          limit: 5,
-          partitionKey: "model",
-          partitionKeyValue: "Events",
-          isPagination: true,
-        );
-      }
-    });
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Events List"),
         actions: [
           IconButton(
-            onPressed: () => controller.reload(),
+            onPressed: () => controller.refreshData(),
             icon: const Icon(Icons.replay_rounded),
           ),
         ],
@@ -104,21 +132,24 @@ class Home extends StatelessWidget {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        return ListView.builder(
-          controller: _scrollController,
-          itemCount: controller.eventList.length +
-              (controller.isFetchingMore.value ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index == controller.eventList.length) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final event = controller.eventList[index];
-            return EventCard(
-              event: event,
-              onDelete: () => _showDeleteConfirmationDialog(
-                  context, event), // Trigger dialog
-            );
-          },
+        return RefreshIndicator(
+          onRefresh: () => controller.refreshData(),
+          child: ListView.builder(
+            controller: _scrollController,
+            itemCount: controller.eventList.length +
+                (controller.isFetchingMore.value ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == controller.eventList.length) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final event = controller.eventList[index];
+              return EventCard(
+                event: event,
+                onDelete: () => _showDeleteConfirmationDialog(
+                    context, event), // Trigger dialog
+              );
+            },
+          ),
         );
       }),
     );

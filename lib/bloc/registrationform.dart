@@ -322,7 +322,6 @@ class _StaffRegistrationFormState extends State<StaffRegistrationForm> {
             showsnakbar(context, "Your Profile Registered Successfully");
           }
 
-          // Refresh the profile data
           BlocProvider.of<UserprofileBloc>(context).add(
             GetUserProfileEvent(
               email: widget.email,

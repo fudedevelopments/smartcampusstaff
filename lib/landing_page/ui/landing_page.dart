@@ -6,6 +6,11 @@ import 'package:smartcampusstaff/home/homeui.dart';
 import 'package:smartcampusstaff/landing_page/landiing_bloc/landing_page_bloc.dart';
 import 'package:smartcampusstaff/onduty/ui/ondutyUI.dart';
 import 'package:smartcampusstaff/profile/profileui.dart';
+import 'package:smartcampusstaff/utils/image_cache_service.dart';
+import 'package:get/get.dart';
+import 'package:smartcampusstaff/utils/authservices.dart';
+import 'package:smartcampusstaff/utils/apicall.dart';
+import 'package:smartcampusstaff/home/apicallevent.dart';
 
 List<BottomNavigationBarItem> bottomnavItem = [
   const BottomNavigationBarItem(
@@ -26,13 +31,66 @@ List<BottomNavigationBarItem> bottomnavItem = [
 ];
 
 List<Widget> bottomnaviScreen = [
-  Home(),
-  OndutyUI(),
-  UserProfilePage(),
+  const Home(),
+  const OndutyUI(),
+  const UserProfilePage(),
 ];
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
+
+  // Method to clear image cache and refresh data
+  void _refreshApp(BuildContext context, int currentTabIndex) {
+    // Clear image caches
+    ImageCacheService().clearAllCaches();
+
+    final authService = AuthService();
+
+    // Refresh the current tab's data based on index
+    switch (currentTabIndex) {
+      case 0: // Home tab
+        // Use GetX to find and refresh the EventController
+        if (Get.isRegistered<EventController>()) {
+          Get.find<EventController>().refreshData();
+        }
+        break;
+      case 1: // OndutyUI tab
+        // Use GetX to find and refresh the OndutyController
+        if (Get.isRegistered<OndutyController>()) {
+          Get.find<OndutyController>().refreshData(
+            tablename: "onDutyModel-2jskpek75veajd4yfnqjmkppmu-NONE",
+            indexname:
+                "onDutyModelsByProctorAndCreatedAt", // Default to Proctor
+            token: authService.idToken!,
+            limit: 5,
+            partitionKey: "Proctor",
+            partitionKeyValue: authService.sub!,
+          );
+        }
+        break;
+      case 2: // Profile tab
+        // Refresh user profile if needed
+        if (context.read<UserprofileBloc>().state is UserProfileSucessState) {
+          final state =
+              context.read<UserprofileBloc>().state as UserProfileSucessState;
+          context.read<UserprofileBloc>().add(
+                GetUserProfileEvent(
+                  email: state.userProfile.email,
+                  userid: state.userProfile.id,
+                ),
+              );
+        }
+        break;
+    }
+
+    // Show a snackbar to indicate refresh
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Refreshed data and cleared image cache'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +167,10 @@ class LandingPage extends StatelessWidget {
                         ],
                       ),
                       actions: [
+                        IconButton(
+                          icon: const Icon(Icons.refresh),
+                          onPressed: () => _refreshApp(context, state.tabindex),
+                        ),
                         IconButton(
                           icon: const Icon(Icons.notifications_outlined),
                           onPressed: () {

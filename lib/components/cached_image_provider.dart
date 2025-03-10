@@ -1,46 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:smartcampusstaff/utils/utils.dart';
 
-class ImageDisplay extends StatelessWidget {
-  final Future<String> imageUrlFuture;
-  final double? height; // Optional height
-  final double? width; // Optional width
-  final BoxFit fit; // Control how the image fits
-  final Widget? loadingWidget; // Custom loading widget
-  final Widget? errorWidget; // Custom error widget
+class CachedImageProvider extends StatelessWidget {
+  final String imagePath;
+  final double? height;
+  final double? width;
+  final BoxFit fit;
+  final Widget? placeholder;
+  final Widget? errorWidget;
+  final BorderRadius? borderRadius;
   final int? maxHeight; // Maximum height for image quality
   final int? maxWidth; // Maximum width for image quality
 
-  const ImageDisplay({
+  const CachedImageProvider({
     super.key,
-    required this.imageUrlFuture,
+    required this.imagePath,
     this.height,
     this.width,
-    this.fit = BoxFit.cover, // Default to cover
-    this.loadingWidget, // Default loading is now skeleton
-    this.errorWidget, // Default error
+    this.fit = BoxFit.cover,
+    this.placeholder,
+    this.errorWidget,
+    this.borderRadius,
     this.maxHeight,
     this.maxWidth,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Default skeleton loading
-    final defaultLoadingWidget = Shimmer.fromColors(
+    // Default skeleton loading placeholder
+    final defaultPlaceholder = Shimmer.fromColors(
       baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
       child: Container(
         height: height,
         width: width,
-        color: Colors.white,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: borderRadius,
+        ),
       ),
     );
 
-    // Default error widget
     final defaultErrorWidget = Container(
-      height: height,
-      width: width,
       color: Colors.grey.shade200,
       child: const Center(
         child: Icon(Icons.broken_image, color: Colors.grey),
@@ -48,32 +51,35 @@ class ImageDisplay extends StatelessWidget {
     );
 
     return FutureBuilder<String>(
-      future: imageUrlFuture,
+      future: getimage(path: imagePath),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: SizedBox(
-              height: height,
-              width: width,
-              child: loadingWidget ?? defaultLoadingWidget,
+          return Container(
+            height: height,
+            width: width,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: borderRadius,
             ),
+            child: placeholder ?? defaultPlaceholder,
           );
-        } else if (snapshot.hasError) {
-          return Center(
-            child: SizedBox(
-              height: height,
-              width: width,
-              child: errorWidget ?? defaultErrorWidget,
+        } else if (snapshot.hasError || !snapshot.hasData) {
+          return Container(
+            height: height,
+            width: width,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: borderRadius,
             ),
+            child: errorWidget ?? defaultErrorWidget,
           );
-        } else if (snapshot.hasData) {
-          return CachedNetworkImage(
+        } else {
+          final imageWidget = CachedNetworkImage(
             imageUrl: snapshot.data!,
             height: height,
             width: width,
             fit: fit,
-            placeholder: (context, url) =>
-                loadingWidget ?? defaultLoadingWidget,
+            placeholder: (context, url) => placeholder ?? defaultPlaceholder,
             errorWidget: (context, url, error) =>
                 errorWidget ?? defaultErrorWidget,
             // Improve image quality by setting higher cache dimensions
@@ -81,6 +87,7 @@ class ImageDisplay extends StatelessWidget {
                 (height?.toInt() != null ? height!.toInt() * 2 : null),
             memCacheWidth: maxWidth ??
                 (width?.toInt() != null ? width!.toInt() * 2 : null),
+            cacheKey: snapshot.data,
             // Improve image quality
             fadeInDuration: const Duration(milliseconds: 200),
             maxHeightDiskCache:
@@ -88,14 +95,15 @@ class ImageDisplay extends StatelessWidget {
             maxWidthDiskCache:
                 maxWidth ?? 1024, // Higher resolution for disk cache
           );
-        } else {
-          return Center(
-            child: SizedBox(
-              height: height,
-              width: width,
-              child: const Text('No image URL found'),
-            ),
-          );
+
+          if (borderRadius != null) {
+            return ClipRRect(
+              borderRadius: borderRadius!,
+              child: imageWidget,
+            );
+          }
+
+          return imageWidget;
         }
       },
     );

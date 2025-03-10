@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:smartcampusstaff/components/display_image.dart';
+import 'package:smartcampusstaff/components/cached_image_provider.dart';
 import 'package:smartcampusstaff/model/eventmodel.dart';
 import 'package:smartcampusstaff/utils/utils.dart';
 
@@ -37,30 +37,17 @@ class EventCard extends StatelessWidget {
                       ? SizedBox(
                           height: 120,
                           width: double.infinity, // Ensure it takes full width
-                          child: ImageDisplay(
-                            imageUrlFuture: getimage(path: event.images[0]),
+                          child: CachedImageProvider(
+                            imagePath: event.images[0],
                             height: 120, // Match the SizedBox height
+                            width: double.infinity,
                             fit: BoxFit.cover, // Ensure it covers the area
-                            loadingWidget: const Center(
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.blueAccent),
-                              ),
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(12),
                             ),
-                            errorWidget: Container(
-                              height: 120,
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Colors.grey, Colors.black45],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                              ),
-                              child: const Center(
-                                child: Icon(Icons.broken_image,
-                                    color: Colors.white, size: 32),
-                              ),
-                            ),
+                            // Higher quality image settings
+                            maxHeight: 600,
+                            maxWidth: 800,
                           ),
                         )
                       : Container(
