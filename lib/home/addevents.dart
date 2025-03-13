@@ -45,9 +45,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
-            primaryColor: Colors.orange,
-            hintColor: Colors.orange,
-            colorScheme: ColorScheme.light(primary: Colors.orange),
+            primaryColor: Colors.blueAccent,
+            hintColor: Colors.blueAccent,
+            colorScheme: ColorScheme.light(primary: Colors.blueAccent),
             buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
           ),
           child: child!,
@@ -101,7 +101,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       appBar: AppBar(
         title: Text("Create Event"),
         centerTitle: true,
-        backgroundColor: Colors.orange,
+        backgroundColor: Colors.blueAccent,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20),
@@ -178,7 +178,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.blueAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -210,7 +210,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       child: TextField(
         controller: controller,
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.orange),
+          prefixIcon: Icon(icon, color: Colors.blueAccent),
           hintText: label,
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -239,9 +239,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         subtitle: showTTL && date != null
             ? Text("TTL: ${_calculateTTL()} seconds",
                 style: TextStyle(
-                    color: Colors.orange, fontWeight: FontWeight.bold))
+                    color: Colors.blueAccent, fontWeight: FontWeight.bold))
             : null,
-        trailing: Icon(icon, color: Colors.orange),
+        trailing: Icon(icon, color: Colors.blueAccent),
         onTap: onTap,
       ),
     );

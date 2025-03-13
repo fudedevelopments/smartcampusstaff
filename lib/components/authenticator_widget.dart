@@ -5,6 +5,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smartcampusstaff/bloc/userprofile_bloc.dart';
+import 'package:smartcampusstaff/components/custom_signin_form.dart';
 import 'package:smartcampusstaff/components/customscaffold.dart';
 import 'package:smartcampusstaff/utils/authservices.dart';
 
@@ -83,21 +84,7 @@ class _AuthenticatorWidgetState extends State<AuthenticatorWidget> {
           case AuthenticatorStep.signIn:
             return CustomScaffold(
               state: state,
-              body: Column(
-                children: [
-                  const SizedBox(height: 5),
-                  const Text(
-                    "Welcome to Smart Campus",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    "Staff SignIn",
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                  ),
-                  SignInForm(),
-                ],
-              ),
+              body: const CustomSignInForm(),
             );
           case AuthenticatorStep.resetPassword:
             return CustomScaffold(

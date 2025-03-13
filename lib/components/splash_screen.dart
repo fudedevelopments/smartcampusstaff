@@ -104,7 +104,8 @@ class _SplashScreenState extends State<SplashScreen>
               // Animated background
               Positioned.fill(
                 child: CustomPaint(
-                  painter: EducationBackgroundPainter(_backgroundAnimation.value),
+                  painter:
+                      EducationBackgroundPainter(_backgroundAnimation.value),
                 ),
               ),
 
@@ -146,13 +147,17 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildEducationIcon(Icons.school, _iconAnimation.value * 0.7),
+                          _buildEducationIcon(
+                              Icons.school, _iconAnimation.value * 0.7),
                           const SizedBox(width: 20),
-                          _buildEducationIcon(Icons.people, _iconAnimation.value * 0.8),
+                          _buildEducationIcon(
+                              Icons.people, _iconAnimation.value * 0.8),
                           const SizedBox(width: 20),
-                          _buildEducationIcon(Icons.admin_panel_settings, _iconAnimation.value * 0.9),
+                          _buildEducationIcon(Icons.admin_panel_settings,
+                              _iconAnimation.value * 0.9),
                           const SizedBox(width: 20),
-                          _buildEducationIcon(Icons.menu_book, _iconAnimation.value),
+                          _buildEducationIcon(
+                              Icons.menu_book, _iconAnimation.value),
                         ],
                       ),
                     ),
@@ -184,7 +189,8 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Opacity(
                         opacity: 1 - _textSlideAnimation.value / 60,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 6),
                           decoration: BoxDecoration(
                             color: const Color(0xFF1A237E),
                             borderRadius: BorderRadius.circular(20),
@@ -208,7 +214,8 @@ class _SplashScreenState extends State<SplashScreen>
                     Transform.scale(
                       scale: _necAnimation.value,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: const Color(0xFF1565C0),
                           borderRadius: BorderRadius.circular(8),
@@ -247,7 +254,10 @@ class _SplashScreenState extends State<SplashScreen>
                     height: 40,
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Color.lerp(const Color(0xFF1A237E), const Color(0xFF1565C0), _backgroundAnimation.value)!,
+                        Color.lerp(
+                            const Color(0xFF1A237E),
+                            const Color(0xFF1565C0),
+                            _backgroundAnimation.value)!,
                       ),
                       strokeWidth: 3,
                     ),
@@ -303,7 +313,8 @@ class EducationBackgroundPainter extends CustomPainter {
         colors: [
           const Color(0xFFE8EAF6),
           const Color(0xFFC5CAE9),
-          Color.lerp(const Color(0xFFC5CAE9), const Color(0xFF9FA8DA), animationValue)!,
+          Color.lerp(const Color(0xFFC5CAE9), const Color(0xFF9FA8DA),
+              animationValue)!,
         ],
         stops: [0.0, 0.6, 1.0],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
@@ -316,15 +327,19 @@ class EducationBackgroundPainter extends CustomPainter {
 
   void drawEducationElements(Canvas canvas, Size size) {
     // Draw books
-    drawBook(canvas, Offset(size.width * 0.1, size.height * 0.2), size.width * 0.08, animationValue);
-    drawBook(canvas, Offset(size.width * 0.85, size.height * 0.75), size.width * 0.1, 1 - animationValue);
-    
+    drawBook(canvas, Offset(size.width * 0.1, size.height * 0.2),
+        size.width * 0.08, animationValue);
+    drawBook(canvas, Offset(size.width * 0.85, size.height * 0.75),
+        size.width * 0.1, 1 - animationValue);
+
     // Draw graduation cap
-    drawGraduationCap(canvas, Offset(size.width * 0.8, size.height * 0.15), size.width * 0.1, animationValue);
-    
+    drawGraduationCap(canvas, Offset(size.width * 0.8, size.height * 0.15),
+        size.width * 0.1, animationValue);
+
     // Draw pencil
-    drawPencil(canvas, Offset(size.width * 0.15, size.height * 0.8), size.width * 0.15, 1 - animationValue);
-    
+    drawPencil(canvas, Offset(size.width * 0.15, size.height * 0.8),
+        size.width * 0.15, 1 - animationValue);
+
     // Draw grid pattern
     drawGrid(canvas, size);
   }
@@ -333,36 +348,37 @@ class EducationBackgroundPainter extends CustomPainter {
     final bookPaint = Paint()
       ..color = const Color(0xFF1A237E).withOpacity(0.05 + 0.05 * animation)
       ..style = PaintingStyle.fill;
-    
+
     final path = Path();
     path.moveTo(position.dx, position.dy);
     path.lineTo(position.dx + size, position.dy);
     path.lineTo(position.dx + size, position.dy + size * 1.2);
     path.lineTo(position.dx, position.dy + size * 1.2);
     path.close();
-    
+
     canvas.drawPath(path, bookPaint);
-    
+
     // Book spine
     final spinePaint = Paint()
       ..color = const Color(0xFF1A237E).withOpacity(0.1 + 0.05 * animation)
       ..style = PaintingStyle.fill;
-    
+
     final spinePath = Path();
     spinePath.moveTo(position.dx, position.dy);
     spinePath.lineTo(position.dx - size * 0.1, position.dy + size * 0.1);
     spinePath.lineTo(position.dx - size * 0.1, position.dy + size * 1.3);
     spinePath.lineTo(position.dx, position.dy + size * 1.2);
     spinePath.close();
-    
+
     canvas.drawPath(spinePath, spinePaint);
   }
 
-  void drawGraduationCap(Canvas canvas, Offset position, double size, double animation) {
+  void drawGraduationCap(
+      Canvas canvas, Offset position, double size, double animation) {
     final capPaint = Paint()
       ..color = const Color(0xFF1A237E).withOpacity(0.05 + 0.05 * animation)
       ..style = PaintingStyle.fill;
-    
+
     // Cap base
     final path = Path();
     path.moveTo(position.dx - size / 2, position.dy);
@@ -370,9 +386,9 @@ class EducationBackgroundPainter extends CustomPainter {
     path.lineTo(position.dx + size / 4, position.dy - size / 2);
     path.lineTo(position.dx - size / 4, position.dy - size / 2);
     path.close();
-    
+
     canvas.drawPath(path, capPaint);
-    
+
     // Cap top
     canvas.drawCircle(
       Offset(position.dx, position.dy - size / 2),
@@ -381,18 +397,19 @@ class EducationBackgroundPainter extends CustomPainter {
     );
   }
 
-  void drawPencil(Canvas canvas, Offset position, double size, double animation) {
+  void drawPencil(
+      Canvas canvas, Offset position, double size, double animation) {
     final pencilPaint = Paint()
       ..color = const Color(0xFF1A237E).withOpacity(0.05 + 0.05 * animation)
       ..style = PaintingStyle.fill;
-    
+
     // Pencil body
     final path = Path();
     path.moveTo(position.dx, position.dy);
     path.lineTo(position.dx + size * 0.1, position.dy + size);
     path.lineTo(position.dx - size * 0.1, position.dy + size);
     path.close();
-    
+
     canvas.drawPath(path, pencilPaint);
   }
 
@@ -401,7 +418,7 @@ class EducationBackgroundPainter extends CustomPainter {
       ..color = const Color(0xFF1A237E).withOpacity(0.03)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
-    
+
     // Horizontal lines
     for (double y = 0; y < size.height; y += size.height / 20) {
       canvas.drawLine(
@@ -410,7 +427,7 @@ class EducationBackgroundPainter extends CustomPainter {
         gridPaint,
       );
     }
-    
+
     // Vertical lines
     for (double x = 0; x < size.width; x += size.width / 20) {
       canvas.drawLine(

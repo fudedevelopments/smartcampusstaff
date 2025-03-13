@@ -116,11 +116,18 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Events List"),
+        title: const Text(
+          "Events List",
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.white,
         actions: [
           IconButton(
             onPressed: () => controller.refreshData(),
-            icon: const Icon(Icons.replay_rounded),
+            icon: const Icon(
+              Icons.replay_rounded,
+              color: Colors.black,
+            ),
           ),
         ],
       ),

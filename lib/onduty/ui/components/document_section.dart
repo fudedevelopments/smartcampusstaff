@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:smartcampusstaff/model/newonduty.dart';
 
 class DocumentSection extends StatelessWidget {

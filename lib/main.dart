@@ -23,6 +23,15 @@ import 'package:smartcampusstaff/utils/firebaseapi.dart';
 import 'package:smartcampusstaff/utils/image_cache_service.dart';
 import 'package:get/get.dart';
 
+// NEC brand colors
+class NECColors {
+  static const Color darkBlue = Color(0xFF1A237E);
+  static const Color mediumBlue = Color(0xFF3949AB);
+  static const Color lightBlue = Color(0xFF5C6BC0);
+  static const Color paleBlue = Color(0xFFE8EAF6);
+  static const Color accentBlue = Color(0xFFC5CAE9);
+}
+
 Future<void> _configureAmplify() async {
   try {
     final api = AmplifyAPI(
@@ -83,9 +92,98 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Define the app theme with NEC branding
+    final theme = ThemeData(
+      primarySwatch: Colors.indigo,
+      primaryColor: NECColors.darkBlue,
+      colorScheme: const ColorScheme.light(
+        primary: NECColors.darkBlue,
+        secondary: NECColors.mediumBlue,
+        background: Colors.white,
+        surface: Colors.white,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onBackground: Colors.black87,
+        onSurface: Colors.black87,
+      ),
+      scaffoldBackgroundColor: Colors.white,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: NECColors.darkBlue,
+        elevation: 2,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1,
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      cardTheme: CardTheme(
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        clipBehavior: Clip.antiAlias,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: NECColors.darkBlue,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          elevation: 2,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: NECColors.mediumBlue,
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: NECColors.accentBlue),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: NECColors.accentBlue),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: NECColors.mediumBlue, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        labelStyle: const TextStyle(color: NECColors.lightBlue),
+        floatingLabelStyle: const TextStyle(color: NECColors.mediumBlue),
+      ),
+      fontFamily: 'Roboto',
+      textTheme: const TextTheme(
+        displayLarge:
+            TextStyle(fontWeight: FontWeight.bold, color: NECColors.darkBlue),
+        displayMedium:
+            TextStyle(fontWeight: FontWeight.bold, color: NECColors.darkBlue),
+        displaySmall:
+            TextStyle(fontWeight: FontWeight.bold, color: NECColors.darkBlue),
+        headlineMedium:
+            TextStyle(fontWeight: FontWeight.bold, color: NECColors.darkBlue),
+        titleLarge:
+            TextStyle(fontWeight: FontWeight.bold, color: NECColors.darkBlue),
+      ),
+    );
+
     return AuthenticatorWidget(
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: theme,
         builder: Authenticator.builder(),
         home: SplashScreen(
           nextScreen: _buildMainContent(),
