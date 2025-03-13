@@ -35,3 +35,15 @@ class CreateUserProfilestaffFailedState extends UserprofileState {
 
   CreateUserProfilestaffFailedState({required this.error});
 }
+
+class DeviceTokenUpdateSuccessState extends UserprofileState {
+  final StaffUserProfile updatedProfile;
+
+  DeviceTokenUpdateSuccessState({required this.updatedProfile});
+}
+
+class DeviceTokenUpdateFailedState extends UserprofileState {
+  final String error;
+
+  DeviceTokenUpdateFailedState({required this.error});
+}

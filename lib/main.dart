@@ -13,6 +13,7 @@ import 'package:smartcampusstaff/components/authenticator_widget.dart';
 import 'package:smartcampusstaff/components/errorspage.dart';
 import 'package:smartcampusstaff/components/loadinguser.dart';
 import 'package:smartcampusstaff/components/pleasewaitPage.dart';
+import 'package:smartcampusstaff/components/splash_screen.dart';
 import 'package:smartcampusstaff/firebase_options.dart';
 import 'package:smartcampusstaff/landing_page/landiing_bloc/landing_page_bloc.dart';
 import 'package:smartcampusstaff/landing_page/ui/landing_page.dart';
@@ -38,7 +39,6 @@ Future<void> _configureAmplify() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Clear image caches on app start to prevent stale images
   ImageCacheService().clearAllCaches();
 
   await _configureAmplify();
@@ -73,7 +73,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    // Only trigger the bloc if the user is signed in and has email and sub
     if (authService.isSignedIn &&
         authService.email != null &&
         authService.sub != null) {
@@ -88,34 +87,40 @@ class _MyAppState extends State<MyApp> {
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
         builder: Authenticator.builder(),
-        home: BlocBuilder<UserprofileBloc, UserprofileState>(
-          builder: (context, state) {
-            if (state is UserProfileLoadingState) {
-              return Center(
-                child: UserLoadingIndicator(),
-              );
-            }
-            if (state is UserProfileEmptyState) {
-              return StaffRegistrationForm(
-                userid: state.userid,
-                email: state.email,
-              );
-            }
-            if (state is UserProfileSucessState) {
-              return LandingPage();
-            }
-            if (state is UserProfileFailedState) {
-              return ErrorPage(errorMessage: state.error, onRetry: () {});
-            } else {
-              return Scaffold(
-                body: PleaseWaitPage(
-                  message: "Please Wait We are Getting Your Data",
-                ),
-              );
-            }
-          },
+        home: SplashScreen(
+          nextScreen: _buildMainContent(),
         ),
       ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    return BlocBuilder<UserprofileBloc, UserprofileState>(
+      builder: (context, state) {
+        if (state is UserProfileLoadingState) {
+          return Center(
+            child: UserLoadingIndicator(),
+          );
+        }
+        if (state is UserProfileEmptyState) {
+          return StaffRegistrationForm(
+            userid: state.userid,
+            email: state.email,
+          );
+        }
+        if (state is UserProfileSucessState) {
+          return LandingPage();
+        }
+        if (state is UserProfileFailedState) {
+          return ErrorPage(errorMessage: state.error, onRetry: () {});
+        } else {
+          return Scaffold(
+            body: PleaseWaitPage(
+              message: "Please Wait We are Getting Your Data",
+            ),
+          );
+        }
+      },
     );
   }
 }

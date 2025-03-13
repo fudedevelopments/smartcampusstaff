@@ -1,0 +1,2 @@
+D:/necproject/smartcampusstaff/android/app/.cxx/RelWithDebInfo/4v6s5no5/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/necproject/smartcampusstaff/android/app/.cxx/RelWithDebInfo/4v6s5no5/armeabi-v7a/CMakeFiles/rebuild_cache.dir

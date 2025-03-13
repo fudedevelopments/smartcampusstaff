@@ -15,3 +15,10 @@ class UserprofileCreateEvent extends UserprofileEvent {
 
   UserprofileCreateEvent({required this.userProfile});
 }
+
+class UpdateDeviceTokenEvent extends UserprofileEvent {
+  final StaffUserProfile userProfile;
+  final String newToken;
+
+  UpdateDeviceTokenEvent({required this.userProfile, required this.newToken});
+}
