@@ -39,28 +39,22 @@ List<Widget> bottomnaviScreen = [
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
 
-  // Method to clear image cache and refresh data
   void _refreshApp(BuildContext context, int currentTabIndex) {
-    // Clear image caches
     ImageCacheService().clearAllCaches();
 
     final authService = AuthService();
 
-    // Refresh the current tab's data based on index
     switch (currentTabIndex) {
-      case 0: // Home tab
-        // Use GetX to find and refresh the EventController
+      case 0:
         if (Get.isRegistered<EventController>()) {
           Get.find<EventController>().refreshData();
         }
         break;
-      case 1: // OndutyUI tab
-        // Use GetX to find and refresh the OndutyController
+      case 1:
         if (Get.isRegistered<OndutyController>()) {
           Get.find<OndutyController>().refreshData(
             tablename: "onDutyModel-2jskpek75veajd4yfnqjmkppmu-NONE",
-            indexname:
-                "onDutyModelsByProctorAndCreatedAt", // Default to Proctor
+            indexname: "onDutyModelsByProctorAndCreatedAt",
             token: authService.idToken!,
             limit: 5,
             partitionKey: "Proctor",
@@ -68,8 +62,7 @@ class LandingPage extends StatelessWidget {
           );
         }
         break;
-      case 2: // Profile tab
-        // Refresh user profile if needed
+      case 2:
         if (context.read<UserprofileBloc>().state is UserProfileSucessState) {
           final state =
               context.read<UserprofileBloc>().state as UserProfileSucessState;
@@ -83,7 +76,6 @@ class LandingPage extends StatelessWidget {
         break;
     }
 
-    // Show a snackbar to indicate refresh
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Refreshed data and cleared image cache'),
@@ -170,12 +162,6 @@ class LandingPage extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.refresh),
                           onPressed: () => _refreshApp(context, state.tabindex),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.notifications_outlined),
-                          onPressed: () {
-                            // TODO: Implement notifications
-                          },
                         ),
                         const SizedBox(width: 8),
                       ],

@@ -14,11 +14,9 @@ class OndutyController extends GetxController {
   var isLoading = false.obs;
   var isFetchingMore = false.obs;
 
-  // Track the current category to avoid redundant API calls
   var currentCategory = ''.obs;
   var dataLoaded = false.obs;
 
-  // Check if data needs to be loaded for the given category
   bool needsDataRefresh(String category, String partitionKeyValue) {
     return onDutyList.isEmpty ||
         currentCategory.value != category ||
@@ -35,7 +33,6 @@ class OndutyController extends GetxController {
     bool isPagination = false,
     bool forceRefresh = false,
   }) async {
-    // Skip if data is already loaded for this category and not forcing refresh
     if (!forceRefresh &&
         !isPagination &&
         !needsDataRefresh(partitionKey, partitionKeyValue)) {
@@ -49,7 +46,6 @@ class OndutyController extends GetxController {
         isFetchingMore.value = true;
       } else {
         isLoading.value = true;
-        // Clear existing data when loading a new category
         if (currentCategory.value != partitionKey) {
           onDutyList.clear();
           lastEvaluatedKey.value = null;
@@ -92,7 +88,7 @@ class OndutyController extends GetxController {
             jsonResponse.map((item) => OnDutyModel.fromMap(item)).toList();
       }
 
-      // Update tracking variables
+
       currentCategory.value = partitionKey;
       dataLoaded.value = true;
     } catch (e) {
@@ -106,7 +102,7 @@ class OndutyController extends GetxController {
     }
   }
 
-  // Method to force a refresh of data
+
   Future<void> refreshData({
     required String tablename,
     required String indexname,

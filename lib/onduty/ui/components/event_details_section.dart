@@ -54,8 +54,6 @@ class EventDetailsSection extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12),
-            _buildDetailRow(Icons.school, 'Department', model.department),
-            _buildDetailRow(Icons.calendar_today, 'Year', model.year),
             _buildDetailRow(Icons.location_on, 'Location', model.location),
             _buildDetailRow(Icons.event, 'Event', model.eventName),
             _buildDetailRow(Icons.date_range, 'Date', model.date),

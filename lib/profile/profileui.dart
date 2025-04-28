@@ -71,25 +71,52 @@ class UserProfilePage extends StatelessWidget {
                       // Edit Profile Button
                       ElevatedButton.icon(
                         onPressed: () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => StaffRegistrationForm(
-                                userid: state.userProfile.id,
-                                email: state.userProfile.email,
-                                existingProfile: state.userProfile,
-                                isEditing: true,
-                              ),
-                            ),
+                          // Show confirmation dialog
+                          bool? confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Confirm'),
+                                content: Text(
+                                    'Are you sure you want to edit your profile?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    child: Text('Yes'),
+                                  ),
+                                ],
+                              );
+                            },
                           );
-                          if (result == true) {
-                            // Profile was updated, refresh the data
-                            BlocProvider.of<UserprofileBloc>(context).add(
-                              GetUserProfileEvent(
-                                email: state.userProfile.email,
-                                userid: state.userProfile.id,
+
+                          // Only proceed if user confirmed
+                          if (confirm == true) {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StaffRegistrationForm(
+                                  userid: state.userProfile.id,
+                                  email: state.userProfile.email,
+                                  existingProfile: state.userProfile,
+                                  isEditing: true,
+                                ),
                               ),
                             );
+                            if (result == true) {
+                              // Profile was updated, refresh the data
+                              BlocProvider.of<UserprofileBloc>(context).add(
+                                GetUserProfileEvent(
+                                  email: state.userProfile.email,
+                                  userid: state.userProfile.id,
+                                ),
+                              );
+                            }
                           }
                         },
                         icon: Icon(Icons.edit, color: Colors.white),

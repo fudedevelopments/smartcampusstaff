@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:smartcampusstaff/components/cached_image_provider.dart';
+import 'package:smartcampusstaff/home/event_details.dart';
 import 'package:smartcampusstaff/model/eventmodel.dart';
 import 'package:smartcampusstaff/utils/utils.dart';
 
@@ -14,9 +15,7 @@ class EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tapped on ${event.eventName}')),
-        );
+        navigationpush(context, EventDetailsPage(event: event));
       },
       child: Container(
         width: 260,

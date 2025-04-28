@@ -1,9 +1,9 @@
 const amplifyConfig = r'''{
   "auth": {
-    "user_pool_id": "ap-south-1_0KNjUNEF8",
+    "user_pool_id": "ap-south-1_UDuao2UIB",
     "aws_region": "ap-south-1",
-    "user_pool_client_id": "5mq16h5hl4flbobj9hmgmv6oea",
-    "identity_pool_id": "ap-south-1:108c6156-945d-40ce-a8ed-fbc9259ee924",
+    "user_pool_client_id": "12eed29hg2kltd5q12oqedgdc",
+    "identity_pool_id": "ap-south-1:31201f5d-2912-4cae-a772-e48c5e4b418e",
     "mfa_methods": [],
     "standard_required_attributes": [
       "email"
@@ -333,13 +333,6 @@ const amplifyConfig = r'''{
               "isRequired": true,
               "attributes": []
             },
-            "student": {
-              "name": "student",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true,
-              "attributes": []
-            },
             "Proctor": {
               "name": "Proctor",
               "isArray": false,
@@ -368,13 +361,6 @@ const amplifyConfig = r'''{
               "isRequired": true,
               "attributes": []
             },
-            "details": {
-              "name": "details",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
             "location": {
               "name": "location",
               "isArray": false,
@@ -385,7 +371,7 @@ const amplifyConfig = r'''{
             "date": {
               "name": "date",
               "isArray": false,
-              "type": "String",
+              "type": "AWSDate",
               "isRequired": true,
               "attributes": []
             },
@@ -407,30 +393,37 @@ const amplifyConfig = r'''{
             "proctorstatus": {
               "name": "proctorstatus",
               "isArray": false,
-              "type": "String",
-              "isRequired": false,
+              "type": {
+                "enum": "Status"
+              },
+              "isRequired": true,
               "attributes": []
             },
             "AcStatus": {
               "name": "AcStatus",
               "isArray": false,
-              "type": "String",
-              "isRequired": false,
+              "type": {
+                "enum": "Status"
+              },
+              "isRequired": true,
               "attributes": []
             },
             "HodStatus": {
               "name": "HodStatus",
               "isArray": false,
-              "type": "String",
-              "isRequired": false,
+              "type": {
+                "enum": "Status"
+              },
+              "isRequired": true,
               "attributes": []
             },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
-              "type": "AWSTimestamp",
+              "type": "AWSDateTime",
               "isRequired": false,
-              "attributes": []
+              "attributes": [],
+              "isReadOnly": true
             },
             "updatedAt": {
               "name": "updatedAt",
@@ -451,44 +444,38 @@ const amplifyConfig = r'''{
             {
               "type": "key",
               "properties": {
-                "name": "onDutyModelsByStudentAndCreatedAt",
-                "queryField": "listOnDutyModelByStudentAndCreatedAt",
                 "fields": [
-                  "student",
-                  "createdAt"
+                  "id"
                 ]
               }
             },
             {
               "type": "key",
               "properties": {
-                "name": "onDutyModelsByProctorAndCreatedAt",
-                "queryField": "listOnDutyModelByProctorAndCreatedAt",
+                "name": "onDutyModelsByProctor",
+                "queryField": "listOnDutyModelByProctor",
                 "fields": [
-                  "Proctor",
-                  "createdAt"
+                  "Proctor"
                 ]
               }
             },
             {
               "type": "key",
               "properties": {
-                "name": "onDutyModelsByAcAndCreatedAt",
-                "queryField": "listOnDutyModelByAcAndCreatedAt",
+                "name": "onDutyModelsByAc",
+                "queryField": "listOnDutyModelByAc",
                 "fields": [
-                  "Ac",
-                  "createdAt"
+                  "Ac"
                 ]
               }
             },
             {
               "type": "key",
               "properties": {
-                "name": "onDutyModelsByHodAndCreatedAt",
-                "queryField": "listOnDutyModelByHodAndCreatedAt",
+                "name": "onDutyModelsByHod",
+                "queryField": "listOnDutyModelByHod",
                 "fields": [
-                  "Hod",
-                  "createdAt"
+                  "Hod"
                 ]
               }
             },
@@ -498,22 +485,45 @@ const amplifyConfig = r'''{
                 "rules": [
                   {
                     "provider": "userPools",
-                    "ownerField": "student",
+                    "ownerField": "owner",
                     "allow": "owner",
+                    "identityClaim": "cognito:username",
                     "operations": [
                       "create",
-                      "read",
-                      "delete"
-                    ],
-                    "identityClaim": "cognito:username"
+                      "update",
+                      "delete",
+                      "read"
+                    ]
                   },
                   {
-                    "groupClaim": "cognito:groups",
                     "provider": "userPools",
-                    "allow": "groups",
-                    "groups": [
-                      "STAFF"
-                    ],
+                    "ownerField": "Proctor",
+                    "allow": "owner",
+                    "identityClaim": "cognito:username",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  },
+                  {
+                    "provider": "userPools",
+                    "ownerField": "Ac",
+                    "allow": "owner",
+                    "identityClaim": "cognito:username",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  },
+                  {
+                    "provider": "userPools",
+                    "ownerField": "Hod",
+                    "allow": "owner",
+                    "identityClaim": "cognito:username",
                     "operations": [
                       "create",
                       "update",
@@ -532,7 +542,16 @@ const amplifyConfig = r'''{
           }
         }
       },
-      "enums": {},
+      "enums": {
+        "Status": {
+          "name": "Status",
+          "values": [
+            "PENDING",
+            "REJECTED",
+            "APPROVED"
+          ]
+        }
+      },
       "nonModels": {},
       "queries": {
         "listUsersInGroup": {

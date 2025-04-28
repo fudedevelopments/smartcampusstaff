@@ -130,46 +130,41 @@ class _DetailsOndutyState extends State<DetailsOnduty> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Theme.of(context).primaryColor.withOpacity(0.1),
+              Colors.white,
               Colors.white,
             ],
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Card(
-            elevation: 8,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    HeaderSection(model: widget.model),
-                    const SizedBox(height: 20),
-                    ApprovalStatusSection(
-                      model: widget.model,
-                      userRole: widget.index,
-                      selectedStatus: selectedStatus,
-                      isLoading: isLoading,
-                      onStatusChanged: _onStatusChanged,
-                      onUpdateStatus: _updateStatus,
-                    ),
-                    const SizedBox(height: 20),
-                    EventDetailsSection(model: widget.model),
-                    const SizedBox(height: 20),
-                    DocumentSection(
-                      model: widget.model,
-                      downloadedFiles: downloadedFiles,
-                      downloadProgress:
-                          downloadProgress, // Pass download progress
-                      onDownloadFile: (docPath) =>
-                          fileDownloadHelper.downloadFile(docPath),
-                    ),
-                  ],
-                ),
+          padding: const EdgeInsets.all(8.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  HeaderSection(model: widget.model),
+                  const SizedBox(height: 20),
+                  ApprovalStatusSection(
+                    model: widget.model,
+                    userRole: widget.index,
+                    selectedStatus: selectedStatus,
+                    isLoading: isLoading,
+                    onStatusChanged: _onStatusChanged,
+                    onUpdateStatus: _updateStatus,
+                  ),
+                  const SizedBox(height: 20),
+                  EventDetailsSection(model: widget.model),
+                  const SizedBox(height: 20),
+                  DocumentSection(
+                    model: widget.model,
+                    downloadedFiles: downloadedFiles,
+                    downloadProgress:
+                        downloadProgress, // Pass download progress
+                    onDownloadFile: (docPath) =>
+                        fileDownloadHelper.downloadFile(docPath),
+                  ),
+                ],
               ),
             ),
           ),

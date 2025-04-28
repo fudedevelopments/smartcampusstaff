@@ -153,7 +153,7 @@ class _HomeState extends State<Home> {
               return EventCard(
                 event: event,
                 onDelete: () => _showDeleteConfirmationDialog(
-                    context, event), // Trigger dialog
+                    context, event),
               );
             },
           ),
