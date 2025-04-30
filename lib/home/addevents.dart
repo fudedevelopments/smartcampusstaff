@@ -8,7 +8,7 @@ import 'package:smartcampusstaff/components/errorsnack.dart';
 import 'package:smartcampusstaff/components/file_pick.dart';
 import 'package:smartcampusstaff/home/apicallevent.dart';
 import 'package:smartcampusstaff/landing_page/ui/landing_page.dart';
-import 'package:smartcampusstaff/models/ModelProvider.dart';
+import 'package:smartcampusstaff/models/EventsModel.dart';
 import 'package:smartcampusstaff/utils/utils.dart';
 
 class AddEventRequest extends GetxController {
@@ -29,7 +29,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final TextEditingController detailsController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
   final TextEditingController registerUrlController = TextEditingController();
-  TemporalTimestamp awsTimestamp = TemporalTimestamp(DateTime.now().toUtc());
   List<String> uploadedFileUrls = [];
   DateTime? selectedDate;
   DateTime? expiryDate;
@@ -150,23 +149,30 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         int? ttl = _calculateTTL();
                         if (ttl != null) {
                           widget.controller.loading.value = true;
-                          final response = await createEvent(Events(
-                              model: "Events",
-                              images: uploadedFileUrls,
+                          // Convert selectedDate to TemporalDate
+                          final eventDate = TemporalDate(DateTime(
+                            selectedDate!.year,
+                            selectedDate!.month,
+                            selectedDate!.day,
+                          ));
+
+                          final response = await createEvent(EventsModel(
                               eventname: eventNameController.text,
-                              details: detailsController.text,
                               location: locationController.text,
-                              date: selectedDate.toString(),
-                              createdAt: awsTimestamp,
-                              registerUrl: registerUrlController.text,
-                              expiry: ttl));
+                              date: eventDate,
+                              details: detailsController.text,
+                              registeredUrl: registerUrlController.text,
+                              images: uploadedFileUrls,
+                              expiray: TemporalTimestamp.fromSeconds(ttl)));
+
                           if (response.data != null) {
                             widget.controller.loading.value = false;
                             Get.find<EventController>().reload();
                             navigatorpushandremove(context, LandingPage());
                           } else if (response.hasErrors) {
-                            showErrorSnackBar(
-                                context, "There was an Error Occured");
+                            widget.controller.loading.value = false;
+                            showErrorSnackBar(context,
+                                "There was an Error Occurred: ${response.errors.map((e) => e.message).join(', ')}");
                           }
                         }
                       }

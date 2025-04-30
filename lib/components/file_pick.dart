@@ -48,15 +48,15 @@ class _FilePickerBoxUIState extends State<FilePickerBoxUI> {
 
   Future<void> _uploadFile(File file) async {
     try {
-      String fileName = file.path.split('/').last; // Extract file name
-      String fileExtension = fileName.split('.').last; // Extract file extension
+      String fileName = file.path.split('/').last; 
+      String fileExtension = fileName.split('.').last; 
       String uniqueFileName =
-          '${const Uuid().v4()}.$fileExtension'; // Unique name with extension
+          '${const Uuid().v4()}.$fileExtension';
 
       final result = await Amplify.Storage.uploadFile(
         localFile: AWSFilePlatform.fromFile(file),
         path: StoragePath.fromString(
-            'ondutydocs/$uniqueFileName'), // Preserve extension
+            'eventimages/$uniqueFileName'),
       ).result;
 
       setState(() {

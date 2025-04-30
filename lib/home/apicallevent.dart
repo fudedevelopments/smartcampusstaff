@@ -6,13 +6,13 @@ import 'package:dio/dio.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:smartcampusstaff/model/eventmodel.dart';
-import 'package:smartcampusstaff/models/Events.dart';
+import 'package:smartcampusstaff/models/EventsModel.dart';
 
-Future<GraphQLResponse> createEvent(Events eventModel) async {
+Future<GraphQLResponse> createEvent(EventsModel eventModel) async {
   try {
     final request = ModelMutations.create(eventModel);
     final response = await Amplify.API.mutate(request: request).response;
-
+    print(response);
     if (response.hasErrors) {
       throw Exception(response.errors.map((e) => e.message).join(", "));
     }

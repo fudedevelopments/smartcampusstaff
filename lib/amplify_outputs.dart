@@ -1,9 +1,9 @@
 const amplifyConfig = r'''{
   "auth": {
-    "user_pool_id": "ap-south-1_UDuao2UIB",
+    "user_pool_id": "ap-south-1_XhZsbIySU",
     "aws_region": "ap-south-1",
-    "user_pool_client_id": "12eed29hg2kltd5q12oqedgdc",
-    "identity_pool_id": "ap-south-1:31201f5d-2912-4cae-a772-e48c5e4b418e",
+    "user_pool_client_id": "4uv9rchl91tkiootnba5isnog1",
+    "identity_pool_id": "ap-south-1:f7a0e334-a108-4d23-bdeb-7cefbaab0cb6",
     "mfa_methods": [],
     "standard_required_attributes": [
       "email"
@@ -37,7 +37,7 @@ const amplifyConfig = r'''{
     "unauthenticated_identities_enabled": true
   },
   "data": {
-    "url": "https://dp6g5lcr4ve63acalk5pt224ze.appsync-api.ap-south-1.amazonaws.com/graphql",
+    "url": "https://cdrwzc6hibduxevmfzpwkjbo2u.appsync-api.ap-south-1.amazonaws.com/graphql",
     "aws_region": "ap-south-1",
     "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
     "authorization_types": [
@@ -166,6 +166,18 @@ const amplifyConfig = r'''{
                       "delete",
                       "read"
                     ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groups": [
+                      "STAFF",
+                      "ADMINS"
+                    ]
                   }
                 ]
               }
@@ -273,6 +285,17 @@ const amplifyConfig = r'''{
                     ]
                   },
                   {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "read"
+                    ],
+                    "groups": [
+                      "ADMINS"
+                    ]
+                  },
+                  {
                     "allow": "private",
                     "operations": [
                       "read"
@@ -333,6 +356,13 @@ const amplifyConfig = r'''{
               "isRequired": true,
               "attributes": []
             },
+            "student": {
+              "name": "student",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
             "Proctor": {
               "name": "Proctor",
               "isArray": false,
@@ -375,6 +405,13 @@ const amplifyConfig = r'''{
               "isRequired": true,
               "attributes": []
             },
+            "details": {
+              "name": "details",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "registeredUrl": {
               "name": "registeredUrl",
               "isArray": false,
@@ -393,37 +430,30 @@ const amplifyConfig = r'''{
             "proctorstatus": {
               "name": "proctorstatus",
               "isArray": false,
-              "type": {
-                "enum": "Status"
-              },
+              "type": "String",
               "isRequired": true,
               "attributes": []
             },
             "AcStatus": {
               "name": "AcStatus",
               "isArray": false,
-              "type": {
-                "enum": "Status"
-              },
+              "type": "String",
               "isRequired": true,
               "attributes": []
             },
             "HodStatus": {
               "name": "HodStatus",
               "isArray": false,
-              "type": {
-                "enum": "Status"
-              },
+              "type": "String",
               "isRequired": true,
               "attributes": []
             },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
-              "type": "AWSDateTime",
-              "isRequired": false,
-              "attributes": [],
-              "isReadOnly": true
+              "type": "AWSTimestamp",
+              "isRequired": true,
+              "attributes": []
             },
             "updatedAt": {
               "name": "updatedAt",
@@ -444,38 +474,44 @@ const amplifyConfig = r'''{
             {
               "type": "key",
               "properties": {
+                "name": "onDutyModelsByStudentAndCreatedAt",
+                "queryField": "listOnDutyModelByStudentAndCreatedAt",
                 "fields": [
-                  "id"
+                  "student",
+                  "createdAt"
                 ]
               }
             },
             {
               "type": "key",
               "properties": {
-                "name": "onDutyModelsByProctor",
-                "queryField": "listOnDutyModelByProctor",
+                "name": "onDutyModelsByProctorAndCreatedAt",
+                "queryField": "listOnDutyModelByProctorAndCreatedAt",
                 "fields": [
-                  "Proctor"
+                  "Proctor",
+                  "createdAt"
                 ]
               }
             },
             {
               "type": "key",
               "properties": {
-                "name": "onDutyModelsByAc",
-                "queryField": "listOnDutyModelByAc",
+                "name": "onDutyModelsByAcAndCreatedAt",
+                "queryField": "listOnDutyModelByAcAndCreatedAt",
                 "fields": [
-                  "Ac"
+                  "Ac",
+                  "createdAt"
                 ]
               }
             },
             {
               "type": "key",
               "properties": {
-                "name": "onDutyModelsByHod",
-                "queryField": "listOnDutyModelByHod",
+                "name": "onDutyModelsByHodAndCreatedAt",
+                "queryField": "listOnDutyModelByHodAndCreatedAt",
                 "fields": [
-                  "Hod"
+                  "Hod",
+                  "createdAt"
                 ]
               }
             },
@@ -484,10 +520,7 @@ const amplifyConfig = r'''{
               "properties": {
                 "rules": [
                   {
-                    "provider": "userPools",
-                    "ownerField": "owner",
-                    "allow": "owner",
-                    "identityClaim": "cognito:username",
+                    "allow": "private",
                     "operations": [
                       "create",
                       "update",
@@ -496,34 +529,209 @@ const amplifyConfig = r'''{
                     ]
                   },
                   {
+                    "groupClaim": "cognito:groups",
                     "provider": "userPools",
-                    "ownerField": "Proctor",
-                    "allow": "owner",
-                    "identityClaim": "cognito:username",
+                    "allow": "groups",
+                    "groups": [
+                      "ADMINS",
+                      "STAFF"
+                    ],
                     "operations": [
                       "create",
                       "update",
                       "delete",
                       "read"
                     ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
+        "EventsModel": {
+          "name": "EventsModel",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "eventname": {
+              "name": "eventname",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "location": {
+              "name": "location",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "date": {
+              "name": "date",
+              "isArray": false,
+              "type": "AWSDate",
+              "isRequired": true,
+              "attributes": []
+            },
+            "details": {
+              "name": "details",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "registeredUrl": {
+              "name": "registeredUrl",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "images": {
+              "name": "images",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "expiray": {
+              "name": "expiray",
+              "isArray": false,
+              "type": "AWSTimestamp",
+              "isRequired": false,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "EventsModels",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "read"
+                    ]
                   },
                   {
+                    "groupClaim": "cognito:groups",
                     "provider": "userPools",
-                    "ownerField": "Ac",
-                    "allow": "owner",
-                    "identityClaim": "cognito:username",
+                    "allow": "groups",
+                    "groups": [
+                      "ADMINS",
+                      "STAFF"
+                    ],
                     "operations": [
                       "create",
                       "update",
                       "delete",
                       "read"
                     ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
+        "BannerImages": {
+          "name": "BannerImages",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "images": {
+              "name": "images",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "BannerImages",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "read"
+                    ]
                   },
                   {
+                    "groupClaim": "cognito:groups",
                     "provider": "userPools",
-                    "ownerField": "Hod",
-                    "allow": "owner",
-                    "identityClaim": "cognito:username",
+                    "allow": "groups",
+                    "groups": [
+                      "ADMINS",
+                      "STAFF"
+                    ],
                     "operations": [
                       "create",
                       "update",
@@ -542,16 +750,7 @@ const amplifyConfig = r'''{
           }
         }
       },
-      "enums": {
-        "Status": {
-          "name": "Status",
-          "values": [
-            "PENDING",
-            "REJECTED",
-            "APPROVED"
-          ]
-        }
-      },
+      "enums": {},
       "nonModels": {},
       "queries": {
         "listUsersInGroup": {
@@ -601,14 +800,26 @@ const amplifyConfig = r'''{
   },
   "storage": {
     "aws_region": "ap-south-1",
-    "bucket_name": "amplify-smartcampus-prave-smartcampuesbucket54db93-wwdmpe8ssthx",
+    "bucket_name": "amplify-smartcampus-prave-smartcampuesbucket54db93-9ghoagdpwd0n",
     "buckets": [
       {
         "name": "Smartcampues",
-        "bucket_name": "amplify-smartcampus-prave-smartcampuesbucket54db93-wwdmpe8ssthx",
+        "bucket_name": "amplify-smartcampus-prave-smartcampuesbucket54db93-9ghoagdpwd0n",
         "aws_region": "ap-south-1",
         "paths": {
           "ondutydocs/*": {
+            "groupsADMINS": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsSTAFF": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
             "authenticated": [
               "get",
               "list",
@@ -617,6 +828,38 @@ const amplifyConfig = r'''{
             ]
           },
           "eventimages/*": {
+            "groupsADMINS": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsSTAFF": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "authenticated": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ]
+          },
+          "bannerimages/*": {
+            "groupsADMINS": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsSTAFF": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
             "authenticated": [
               "get",
               "list",
@@ -628,5 +871,14 @@ const amplifyConfig = r'''{
       }
     ]
   },
-  "version": "1.3"
+  "version": "1.3",
+  "custom": {
+    "API": {
+      "NecHttp": {
+        "endpoint": "https://c3n6lbtgl0.execute-api.ap-south-1.amazonaws.com/",
+        "region": "ap-south-1",
+        "apiName": "NecHttp"
+      }
+    }
+  }
 }''';
