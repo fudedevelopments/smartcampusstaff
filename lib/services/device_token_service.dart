@@ -16,6 +16,7 @@ class DeviceTokenService {
     Future.microtask(() async {
       try {
         final currentToken = FirebaseApi().token;
+        
 
         // If token is null or same as stored, no need to update
         if (currentToken == null || currentToken == userProfile.deviceToken) {

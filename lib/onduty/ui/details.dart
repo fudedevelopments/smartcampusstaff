@@ -31,7 +31,7 @@ class DetailsOnduty extends StatefulWidget {
 class _DetailsOndutyState extends State<DetailsOnduty> {
   final String downloadPath = '/storage/emulated/0/Download/smartcampusdocs';
   final Map<String, bool> downloadedFiles = {};
-  final Map<String, double> downloadProgress = {}; // Track download progress
+  final Map<String, double> downloadProgress = {};
   String selectedStatus = "PENDING";
   AuthService authService = AuthService();
   bool isLoading = false;

@@ -81,7 +81,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
+    final token = FirebaseApi().token!;
+    print(token);
     if (authService.isSignedIn &&
         authService.email != null &&
         authService.sub != null) {
@@ -92,7 +93,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Define the app theme with NEC branding
     final theme = ThemeData(
       primarySwatch: Colors.indigo,
       primaryColor: NECColors.darkBlue,

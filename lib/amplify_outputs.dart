@@ -156,10 +156,7 @@ const amplifyConfig = r'''{
               "properties": {
                 "rules": [
                   {
-                    "provider": "userPools",
-                    "ownerField": "owner",
-                    "allow": "owner",
-                    "identityClaim": "cognito:username",
+                    "allow": "private",
                     "operations": [
                       "create",
                       "update",
@@ -563,6 +560,13 @@ const amplifyConfig = r'''{
               "isRequired": true,
               "attributes": []
             },
+            "modelname": {
+              "name": "modelname",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "eventname": {
               "name": "eventname",
               "isArray": false,
@@ -616,10 +620,9 @@ const amplifyConfig = r'''{
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
-              "type": "AWSDateTime",
-              "isRequired": false,
-              "attributes": [],
-              "isReadOnly": true
+              "type": "AWSTimestamp",
+              "isRequired": true,
+              "attributes": []
             },
             "updatedAt": {
               "name": "updatedAt",
@@ -636,6 +639,17 @@ const amplifyConfig = r'''{
             {
               "type": "model",
               "properties": {}
+            },
+            {
+              "type": "key",
+              "properties": {
+                "name": "eventsModelsByModelnameAndCreatedAt",
+                "queryField": "listEventsModelByModelnameAndCreatedAt",
+                "fields": [
+                  "modelname",
+                  "createdAt"
+                ]
+              }
             },
             {
               "type": "auth",

@@ -4,6 +4,9 @@ import 'package:smartcampusstaff/components/statuscard.dart';
 import 'package:smartcampusstaff/utils/apicall.dart';
 import 'package:smartcampusstaff/utils/authservices.dart';
 
+// Define a constant for the table name
+const String onDutyTableName = "onDutyModel-oxs67o2v2vfefhdk7fljk63uui-NONE";
+
 class OndutyUI extends StatefulWidget {
   const OndutyUI({super.key});
 
@@ -21,7 +24,6 @@ class _OndutyUIState extends State<OndutyUI> {
   void initState() {
     super.initState();
     _setupScrollListener();
-    // Load data only once when the widget is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
       reload();
     });
@@ -39,7 +41,7 @@ class _OndutyUIState extends State<OndutyUI> {
               _scrollController.position.maxScrollExtent &&
           !controller.isFetchingMore.value) {
         controller.fetchData(
-          tablename: "onDutyModel-2jskpek75veajd4yfnqjmkppmu-NONE",
+          tablename: onDutyTableName,
           indexname: _getIndexName(selectedCategory.value),
           token: authService.idToken!,
           limit: 5,
@@ -57,7 +59,7 @@ class _OndutyUIState extends State<OndutyUI> {
 
     if (forceRefresh) {
       await controller.refreshData(
-        tablename: "onDutyModel-2jskpek75veajd4yfnqjmkppmu-NONE",
+        tablename: onDutyTableName,
         indexname: indexName,
         token: authService.idToken!,
         limit: 5,
@@ -66,7 +68,7 @@ class _OndutyUIState extends State<OndutyUI> {
       );
     } else {
       await controller.fetchData(
-        tablename: "onDutyModel-2jskpek75veajd4yfnqjmkppmu-NONE",
+        tablename: onDutyTableName,
         indexname: indexName,
         token: authService.idToken!,
         limit: 5,

@@ -31,35 +31,34 @@ class EventModel {
       'eventName': eventName,
       'registerUrl': registerUrl,
       'location': location,
-      'date': date.millisecondsSinceEpoch,
-      'updatedAt': updatedAt.millisecondsSinceEpoch,
-      'createdAt': createdAt.millisecondsSinceEpoch,
+      'date': date.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt.millisecondsSinceEpoch ~/ 1000,
       'images': images,
       'details': details,
-      'expiry': expiry.millisecondsSinceEpoch,
+      'expiry': expiry.millisecondsSinceEpoch ~/ 1000,
     };
   }
 
- factory EventModel.fromMap(Map<String, dynamic> map) {
+  factory EventModel.fromMap(Map<String, dynamic> map) {
     return EventModel(
       id: map['id'] as String,
-      eventName: map['eventname'] as String, // <-- Fix here
-      registerUrl: map['registerUrl'] as String,
+      eventName: map['eventname'] as String,
+      registerUrl: map['registeredUrl'] as String,
       location: map['location'] as String,
-      date: DateTime.parse(map['date']), // API returns date as String
-      updatedAt:
-          DateTime.parse(map['updatedAt']), // Fix parsing for ISO strings
-      createdAt: DateTime.fromMillisecondsSinceEpoch(
-          map['createdAt'] * 1000), // Fix UNIX timestamp conversion
-      images: List<String>.from(map['images'] ?? []), // Handle null safety
-      details: map['details'] as String,
-      expiry: DateTime.fromMillisecondsSinceEpoch(
-          map['expiry'] * 1000), // Fix UNIX timestamp
+      date: DateTime.parse(map['date']),
+      updatedAt: DateTime.parse(map['updatedAt']),
+      createdAt:
+          DateTime.fromMillisecondsSinceEpoch((map['createdAt'] as int) * 1000),
+      images: List<String>.from(map['images'] ?? []),
+      details: map['details'] as String? ?? '',
+      expiry:
+          DateTime.fromMillisecondsSinceEpoch((map['expiray'] as int) * 1000),
     );
   }
 
-
   String toJson() => json.encode(toMap());
 
-  factory EventModel.fromJson(String source) => EventModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory EventModel.fromJson(String source) =>
+      EventModel.fromMap(json.decode(source) as Map<String, dynamic>);
 }

@@ -1,12 +1,10 @@
-import 'dart:convert';
-
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_api/amplify_api.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-import 'package:smartcampusstaff/model/eventmodel.dart';
 import 'package:smartcampusstaff/models/EventsModel.dart';
+import 'package:smartcampusstaff/utils/authservices.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 Future<GraphQLResponse> createEvent(EventsModel eventModel) async {
   try {
@@ -27,173 +25,163 @@ Future<GraphQLResponse> createEvent(EventsModel eventModel) async {
   }
 }
 
-class EventController extends GetxController {
-  final Dio _dio = Dio();
-  final String baseUrl =
-      'https://zlj8ylwti7.execute-api.ap-south-1.amazonaws.com/ondutyquery';
-
-  // Reactive variables
-  var lastEvaluatedKey = Rxn<String>();
-  var isLoading = false.obs;
-  var isFetchingMore = false.obs;
-  var eventList = <EventModel>[].obs;
-  var dataLoaded = false.obs;
-
-  // Stored fetch parameters
-  String? _tablename;
-  String? _indexname;
-  String? _token;
-  int? _limit;
-  String? _partitionKey;
-  String? _partitionKeyValue;
-
-  @override
-  void onInit() {
-    super.onInit();
-    // Optionally call reload here if parameters are set
-  }
-
-  // Check if data needs to be loaded
-  bool needsDataRefresh() {
-    return eventList.isEmpty || !dataLoaded.value;
-  }
-
-  // Reload function using stored parameters
-  Future<void> reload() async {
-    if (_tablename == null ||
-        _indexname == null ||
-        _token == null ||
-        _limit == null ||
-        _partitionKey == null ||
-        _partitionKeyValue == null) {
-      safePrint("Error: Fetch parameters not set. Call fetchData first.");
-      return;
+Future<GraphQLResponse> deleteEvent(EventsModel eventModel) async {
+  try {
+    // First delete all images from storage
+    if (eventModel.images != null && eventModel.images!.isNotEmpty) {
+      for (final imagePath in eventModel.images!) {
+        try {
+          await Amplify.Storage.remove(
+            path: StoragePath.fromString(imagePath),
+          ).result;
+          safePrint('Successfully deleted image: $imagePath');
+        } catch (e) {
+          safePrint('Error deleting image: $e');
+          // Continue with other images even if one fails
+        }
+      }
     }
 
-    // Reset pagination and list
-    lastEvaluatedKey.value = null;
-    eventList.clear();
-    dataLoaded.value = false;
+    // Then delete the event from the database
+    final request = ModelMutations.delete(eventModel);
+    final response = await Amplify.API.mutate(request: request).response;
 
-    // Fetch initial data with stored parameters
-    await fetchData(
-      tablename: _tablename!,
-      indexname: _indexname!,
-      token: _token!,
-      limit: _limit!,
-      partitionKey: _partitionKey!,
-      partitionKeyValue: _partitionKeyValue!,
-      isPagination: false,
-      forceRefresh: true,
+    if (response.hasErrors) {
+      throw Exception(response.errors.map((e) => e.message).join(", "));
+    }
+
+    return response;
+  } catch (e) {
+    safePrint("Error deleting event: $e");
+    return GraphQLResponse(
+      data: null,
+      errors: [GraphQLResponseError(message: e.toString())],
     );
   }
+}
 
-  // Fetch data function with parameter storage
-  Future<void> fetchData({
-    required String tablename,
-    required String indexname,
-    required String token,
-    required int limit,
-    required String partitionKey,
-    required String partitionKeyValue,
-    bool isPagination = false,
-    bool forceRefresh = false,
-  }) async {
-    // Store parameters on first call or if they change
-    _tablename = tablename;
-    _indexname = indexname;
-    _token = token;
-    _limit = limit;
-    _partitionKey = partitionKey;
-    _partitionKeyValue = partitionKeyValue;
+Future<GraphQLResponse> updateEvent(EventsModel eventModel) async {
+  try {
+    final request = ModelMutations.update(eventModel);
+    final response = await Amplify.API.mutate(request: request).response;
 
-    // Skip if data is already loaded and not forcing refresh or paginating
-    if (!forceRefresh && !isPagination && !needsDataRefresh()) {
-      return;
+    if (response.hasErrors) {
+      throw Exception(response.errors.map((e) => e.message).join(", "));
     }
 
-    if (isPagination && lastEvaluatedKey.value == null) return; // No more data
+    return response;
+  } catch (e) {
+    safePrint("Error updating event: $e");
+    return GraphQLResponse(
+      data: null,
+      errors: [GraphQLResponseError(message: e.toString())],
+    );
+  }
+}
 
+class EventApiService {
+  static final EventApiService _instance = EventApiService._internal();
+  final Dio _dio = Dio();
+  final String _apiUrl =
+      'https://zlj8ylwti7.execute-api.ap-south-1.amazonaws.com/getEvents';
+
+  factory EventApiService() => _instance;
+
+  EventApiService._internal();
+
+  Future<Map<String, dynamic>> fetchEvents({String? lastEvaluatedKey}) async {
     try {
-      if (isPagination) {
-        isFetchingMore.value = true;
-      } else {
-        isLoading.value = true;
+      final token = AuthService().idToken;
+
+      // Check cache first if no pagination key is provided
+      if (lastEvaluatedKey == null) {
+        final cachedData = await _getCachedEvents();
+        if (cachedData != null) {
+          return cachedData;
+        }
+      }
+
+      // Prepare query parameters for pagination
+      Map<String, dynamic>? queryParams;
+      if (lastEvaluatedKey != null && lastEvaluatedKey.isNotEmpty) {
+        queryParams = {'lastEvaluatedKey': lastEvaluatedKey};
       }
 
       final response = await _dio.get(
-        baseUrl,
-        queryParameters: {
-          'table_name': tablename,
-          'index_name': indexname,
-          'partition_key_value': partitionKeyValue,
-          'partition_key': partitionKey,
-          'limit': limit,
-          if (isPagination && lastEvaluatedKey.value != null)
-            'last_evaluated_key': lastEvaluatedKey.value.toString(),
-        },
+        _apiUrl,
+        queryParameters: queryParams,
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
           },
         ),
       );
-      final decoded = jsonDecode(response.data);
-      List jsonResponse = decoded['items'];
-      final lastKey = decoded['last_evaluated_key'];
-      if (lastKey != null) {
-        lastEvaluatedKey.value = lastKey.toString();
-      } else {
-        lastEvaluatedKey.value = null;
-      }
-      List<EventModel> newData =
-          jsonResponse.map((e) => EventModel.fromMap(e)).toList();
-      if (isPagination) {
-        eventList.addAll(newData); // Append new data
-      } else {
-        eventList.assignAll(newData); // Replace existing data
-      }
 
-      // Mark data as loaded
-      dataLoaded.value = true;
-    } on DioException catch (e) {
-      safePrint("DioError: ${e.response?.statusCode} - ${e.response?.data}");
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+
+        // Cache only the first page
+        if (lastEvaluatedKey == null) {
+          await _cacheEvents(data);
+        }
+
+        return data;
+      } else {
+        throw Exception('Failed to load events: ${response.statusCode}');
+      }
     } catch (e) {
-      safePrint('Error: $e');
-    } finally {
-      isLoading.value = false;
-      isFetchingMore.value = false;
+      if (e is DioError) {
+        print('Dio error: ${e.message}');
+        if (e.response != null) {
+          print('Error response data: ${e.response!.data}');
+          print('Error response status: ${e.response!.statusCode}');
+          throw Exception('API Error: ${e.response!.statusMessage}');
+        }
+      } else {
+        print('Unexpected error: $e');
+      }
+      throw Exception('Failed to fetch events: $e');
     }
   }
 
-  // Method to force a refresh of data
-  Future<void> refreshData() async {
-    if (_tablename == null ||
-        _indexname == null ||
-        _token == null ||
-        _limit == null ||
-        _partitionKey == null ||
-        _partitionKeyValue == null) {
-      safePrint("Error: Fetch parameters not set. Call fetchData first.");
-      return;
+  Future<void> _cacheEvents(Map<String, dynamic> data) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('cached_events', jsonEncode(data));
+      await prefs.setInt(
+          'cache_timestamp', DateTime.now().millisecondsSinceEpoch);
+    } catch (e) {
+      print('Error caching events: $e');
     }
-
-    await fetchData(
-      tablename: _tablename!,
-      indexname: _indexname!,
-      token: _token!,
-      limit: _limit!,
-      partitionKey: _partitionKey!,
-      partitionKeyValue: _partitionKeyValue!,
-      forceRefresh: true,
-    );
   }
 
-  bool hasMoreData() => lastEvaluatedKey.value != null;
+  Future<Map<String, dynamic>?> _getCachedEvents() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedData = prefs.getString('cached_events');
+      final cacheTimestamp = prefs.getInt('cache_timestamp');
 
-  // Optional: Update token if it changes (e.g., after re-authentication)
-  void updateToken(String newToken) {
-    _token = newToken;
+      // Return null if no cached data or cache is older than 15 minutes
+      if (cachedData == null || cacheTimestamp == null) return null;
+
+      final cacheTime = DateTime.fromMillisecondsSinceEpoch(cacheTimestamp);
+      final now = DateTime.now();
+      if (now.difference(cacheTime).inMinutes > 15) return null;
+
+      return jsonDecode(cachedData) as Map<String, dynamic>;
+    } catch (e) {
+      print('Error retrieving cached events: $e');
+      return null;
+    }
+  }
+
+  Future<void> clearCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('cached_events');
+      await prefs.remove('cache_timestamp');
+    } catch (e) {
+      print('Error clearing cache: $e');
+    }
   }
 }

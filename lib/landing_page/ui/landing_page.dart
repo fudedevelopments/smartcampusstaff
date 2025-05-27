@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smartcampusstaff/bloc/userprofile_bloc.dart';
+import 'package:smartcampusstaff/home/controllers/events_controller.dart'
+    as events;
 import 'package:smartcampusstaff/home/homeui.dart';
 import 'package:smartcampusstaff/landing_page/landiing_bloc/landing_page_bloc.dart';
 import 'package:smartcampusstaff/onduty/ui/ondutyUI.dart';
@@ -10,7 +12,6 @@ import 'package:smartcampusstaff/utils/image_cache_service.dart';
 import 'package:get/get.dart';
 import 'package:smartcampusstaff/utils/authservices.dart';
 import 'package:smartcampusstaff/utils/apicall.dart';
-import 'package:smartcampusstaff/home/apicallevent.dart';
 
 List<BottomNavigationBarItem> bottomnavItem = [
   const BottomNavigationBarItem(
@@ -46,21 +47,14 @@ class LandingPage extends StatelessWidget {
 
     switch (currentTabIndex) {
       case 0:
-        if (Get.isRegistered<EventController>()) {
-          Get.find<EventController>().refreshData();
+        // Refresh events on Dashboard tab
+        if (Get.isRegistered<events.EventsController>()) {
+          final eventsController = Get.find<events.EventsController>();
+          eventsController.refreshData();
         }
         break;
       case 1:
-        if (Get.isRegistered<OndutyController>()) {
-          Get.find<OndutyController>().refreshData(
-            tablename: "onDutyModel-2jskpek75veajd4yfnqjmkppmu-NONE",
-            indexname: "onDutyModelsByProctorAndCreatedAt",
-            token: authService.idToken!,
-            limit: 5,
-            partitionKey: "Proctor",
-            partitionKeyValue: authService.sub!,
-          );
-        }
+        if (Get.isRegistered<OndutyController>()) {}
         break;
       case 2:
         if (context.read<UserprofileBloc>().state is UserProfileSucessState) {

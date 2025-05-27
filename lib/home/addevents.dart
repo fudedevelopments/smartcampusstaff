@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:smartcampusstaff/components/errorsnack.dart';
 import 'package:smartcampusstaff/components/file_pick.dart';
 import 'package:smartcampusstaff/home/apicallevent.dart';
+import 'package:smartcampusstaff/home/controllers/events_controller.dart';
 import 'package:smartcampusstaff/landing_page/ui/landing_page.dart';
 import 'package:smartcampusstaff/models/EventsModel.dart';
 import 'package:smartcampusstaff/utils/utils.dart';
@@ -65,7 +66,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
   }
 
-  /// Function to calculate TTL (Time to Live) for AWS DynamoDB
   int? _calculateTTL() {
     if (expiryDate != null) {
       return expiryDate!.millisecondsSinceEpoch ~/ 1000;
@@ -149,7 +149,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         int? ttl = _calculateTTL();
                         if (ttl != null) {
                           widget.controller.loading.value = true;
-                          // Convert selectedDate to TemporalDate
                           final eventDate = TemporalDate(DateTime(
                             selectedDate!.year,
                             selectedDate!.month,
@@ -163,11 +162,33 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                               details: detailsController.text,
                               registeredUrl: registerUrlController.text,
                               images: uploadedFileUrls,
+                              createdAt: TemporalTimestamp.now(),
                               expiray: TemporalTimestamp.fromSeconds(ttl)));
 
                           if (response.data != null) {
                             widget.controller.loading.value = false;
-                            Get.find<EventController>().reload();
+
+                            // Clear the event cache to ensure fresh data
+                            final eventApiService = EventApiService();
+                            await eventApiService.clearCache();
+
+                            // Get the events controller if it exists
+                            if (Get.isRegistered<EventsController>()) {
+                              final eventsController =
+                                  Get.find<EventsController>();
+                              // Refresh events data before navigating
+                              await eventsController.refreshData();
+                            }
+
+                            // Show success message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Event created successfully'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+
+                            // Now navigate to landing page
                             navigatorpushandremove(context, LandingPage());
                           } else if (response.hasErrors) {
                             widget.controller.loading.value = false;
@@ -203,7 +224,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     );
   }
 
-  /// Reusable Function to Build Stylish TextFields
   Widget _buildTextField(
       TextEditingController controller, String label, IconData icon) {
     return Container(

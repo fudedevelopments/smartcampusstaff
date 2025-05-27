@@ -28,6 +28,7 @@ import 'package:collection/collection.dart';
 class EventsModel extends amplify_core.Model {
   static const classType = const _EventsModelModelType();
   final String id;
+  final String? _modelname;
   final String? _eventname;
   final String? _location;
   final amplify_core.TemporalDate? _date;
@@ -35,7 +36,7 @@ class EventsModel extends amplify_core.Model {
   final String? _registeredUrl;
   final List<String>? _images;
   final amplify_core.TemporalTimestamp? _expiray;
-  final amplify_core.TemporalDateTime? _createdAt;
+  final amplify_core.TemporalTimestamp? _createdAt;
   final amplify_core.TemporalDateTime? _updatedAt;
 
   @override
@@ -49,6 +50,10 @@ class EventsModel extends amplify_core.Model {
       return EventsModelModelIdentifier(
         id: id
       );
+  }
+  
+  String? get modelname {
+    return _modelname;
   }
   
   String get eventname {
@@ -115,26 +120,37 @@ class EventsModel extends amplify_core.Model {
     return _expiray;
   }
   
-  amplify_core.TemporalDateTime? get createdAt {
-    return _createdAt;
+  amplify_core.TemporalTimestamp get createdAt {
+    try {
+      return _createdAt!;
+    } catch(e) {
+      throw amplify_core.AmplifyCodeGenModelException(
+          amplify_core.AmplifyExceptionMessages.codeGenRequiredFieldForceCastExceptionMessage,
+          recoverySuggestion:
+            amplify_core.AmplifyExceptionMessages.codeGenRequiredFieldForceCastRecoverySuggestion,
+          underlyingException: e.toString()
+          );
+    }
   }
   
   amplify_core.TemporalDateTime? get updatedAt {
     return _updatedAt;
   }
   
-  const EventsModel._internal({required this.id, required eventname, required location, required date, details, required registeredUrl, images, expiray, createdAt, updatedAt}): _eventname = eventname, _location = location, _date = date, _details = details, _registeredUrl = registeredUrl, _images = images, _expiray = expiray, _createdAt = createdAt, _updatedAt = updatedAt;
+  const EventsModel._internal({required this.id, modelname, required eventname, required location, required date, details, required registeredUrl, images, expiray, required createdAt, updatedAt}): _modelname = modelname, _eventname = eventname, _location = location, _date = date, _details = details, _registeredUrl = registeredUrl, _images = images, _expiray = expiray, _createdAt = createdAt, _updatedAt = updatedAt;
   
-  factory EventsModel({String? id, required String eventname, required String location, required amplify_core.TemporalDate date, String? details, required String registeredUrl, List<String>? images, amplify_core.TemporalTimestamp? expiray}) {
+  factory EventsModel({String? id, String? modelname, required String eventname, required String location, required amplify_core.TemporalDate date, String? details, required String registeredUrl, List<String>? images, amplify_core.TemporalTimestamp? expiray, required amplify_core.TemporalTimestamp createdAt}) {
     return EventsModel._internal(
       id: id == null ? amplify_core.UUID.getUUID() : id,
+      modelname: modelname,
       eventname: eventname,
       location: location,
       date: date,
       details: details,
       registeredUrl: registeredUrl,
       images: images != null ? List<String>.unmodifiable(images) : images,
-      expiray: expiray);
+      expiray: expiray,
+      createdAt: createdAt);
   }
   
   bool equals(Object other) {
@@ -146,13 +162,15 @@ class EventsModel extends amplify_core.Model {
     if (identical(other, this)) return true;
     return other is EventsModel &&
       id == other.id &&
+      _modelname == other._modelname &&
       _eventname == other._eventname &&
       _location == other._location &&
       _date == other._date &&
       _details == other._details &&
       _registeredUrl == other._registeredUrl &&
       DeepCollectionEquality().equals(_images, other._images) &&
-      _expiray == other._expiray;
+      _expiray == other._expiray &&
+      _createdAt == other._createdAt;
   }
   
   @override
@@ -164,6 +182,7 @@ class EventsModel extends amplify_core.Model {
     
     buffer.write("EventsModel {");
     buffer.write("id=" + "$id" + ", ");
+    buffer.write("modelname=" + "$_modelname" + ", ");
     buffer.write("eventname=" + "$_eventname" + ", ");
     buffer.write("location=" + "$_location" + ", ");
     buffer.write("date=" + (_date != null ? _date!.format() : "null") + ", ");
@@ -171,48 +190,55 @@ class EventsModel extends amplify_core.Model {
     buffer.write("registeredUrl=" + "$_registeredUrl" + ", ");
     buffer.write("images=" + (_images != null ? _images!.toString() : "null") + ", ");
     buffer.write("expiray=" + (_expiray != null ? _expiray!.toString() : "null") + ", ");
-    buffer.write("createdAt=" + (_createdAt != null ? _createdAt!.format() : "null") + ", ");
+    buffer.write("createdAt=" + (_createdAt != null ? _createdAt!.toString() : "null") + ", ");
     buffer.write("updatedAt=" + (_updatedAt != null ? _updatedAt!.format() : "null"));
     buffer.write("}");
     
     return buffer.toString();
   }
   
-  EventsModel copyWith({String? eventname, String? location, amplify_core.TemporalDate? date, String? details, String? registeredUrl, List<String>? images, amplify_core.TemporalTimestamp? expiray}) {
+  EventsModel copyWith({String? modelname, String? eventname, String? location, amplify_core.TemporalDate? date, String? details, String? registeredUrl, List<String>? images, amplify_core.TemporalTimestamp? expiray, amplify_core.TemporalTimestamp? createdAt}) {
     return EventsModel._internal(
       id: id,
+      modelname: modelname ?? this.modelname,
       eventname: eventname ?? this.eventname,
       location: location ?? this.location,
       date: date ?? this.date,
       details: details ?? this.details,
       registeredUrl: registeredUrl ?? this.registeredUrl,
       images: images ?? this.images,
-      expiray: expiray ?? this.expiray);
+      expiray: expiray ?? this.expiray,
+      createdAt: createdAt ?? this.createdAt);
   }
   
   EventsModel copyWithModelFieldValues({
+    ModelFieldValue<String?>? modelname,
     ModelFieldValue<String>? eventname,
     ModelFieldValue<String>? location,
     ModelFieldValue<amplify_core.TemporalDate>? date,
     ModelFieldValue<String?>? details,
     ModelFieldValue<String>? registeredUrl,
     ModelFieldValue<List<String>?>? images,
-    ModelFieldValue<amplify_core.TemporalTimestamp?>? expiray
+    ModelFieldValue<amplify_core.TemporalTimestamp?>? expiray,
+    ModelFieldValue<amplify_core.TemporalTimestamp>? createdAt
   }) {
     return EventsModel._internal(
       id: id,
+      modelname: modelname == null ? this.modelname : modelname.value,
       eventname: eventname == null ? this.eventname : eventname.value,
       location: location == null ? this.location : location.value,
       date: date == null ? this.date : date.value,
       details: details == null ? this.details : details.value,
       registeredUrl: registeredUrl == null ? this.registeredUrl : registeredUrl.value,
       images: images == null ? this.images : images.value,
-      expiray: expiray == null ? this.expiray : expiray.value
+      expiray: expiray == null ? this.expiray : expiray.value,
+      createdAt: createdAt == null ? this.createdAt : createdAt.value
     );
   }
   
   EventsModel.fromJson(Map<String, dynamic> json)  
     : id = json['id'],
+      _modelname = json['modelname'],
       _eventname = json['eventname'],
       _location = json['location'],
       _date = json['date'] != null ? amplify_core.TemporalDate.fromString(json['date']) : null,
@@ -220,15 +246,16 @@ class EventsModel extends amplify_core.Model {
       _registeredUrl = json['registeredUrl'],
       _images = json['images']?.cast<String>(),
       _expiray = json['expiray'] != null ? amplify_core.TemporalTimestamp.fromSeconds(json['expiray']) : null,
-      _createdAt = json['createdAt'] != null ? amplify_core.TemporalDateTime.fromString(json['createdAt']) : null,
+      _createdAt = json['createdAt'] != null ? amplify_core.TemporalTimestamp.fromSeconds(json['createdAt']) : null,
       _updatedAt = json['updatedAt'] != null ? amplify_core.TemporalDateTime.fromString(json['updatedAt']) : null;
   
   Map<String, dynamic> toJson() => {
-    'id': id, 'eventname': _eventname, 'location': _location, 'date': _date?.format(), 'details': _details, 'registeredUrl': _registeredUrl, 'images': _images, 'expiray': _expiray?.toSeconds(), 'createdAt': _createdAt?.format(), 'updatedAt': _updatedAt?.format()
+    'id': id, 'modelname': _modelname, 'eventname': _eventname, 'location': _location, 'date': _date?.format(), 'details': _details, 'registeredUrl': _registeredUrl, 'images': _images, 'expiray': _expiray?.toSeconds(), 'createdAt': _createdAt?.toSeconds(), 'updatedAt': _updatedAt?.format()
   };
   
   Map<String, Object?> toMap() => {
     'id': id,
+    'modelname': _modelname,
     'eventname': _eventname,
     'location': _location,
     'date': _date,
@@ -242,6 +269,7 @@ class EventsModel extends amplify_core.Model {
 
   static final amplify_core.QueryModelIdentifier<EventsModelModelIdentifier> MODEL_IDENTIFIER = amplify_core.QueryModelIdentifier<EventsModelModelIdentifier>();
   static final ID = amplify_core.QueryField(fieldName: "id");
+  static final MODELNAME = amplify_core.QueryField(fieldName: "modelname");
   static final EVENTNAME = amplify_core.QueryField(fieldName: "eventname");
   static final LOCATION = amplify_core.QueryField(fieldName: "location");
   static final DATE = amplify_core.QueryField(fieldName: "date");
@@ -249,6 +277,7 @@ class EventsModel extends amplify_core.Model {
   static final REGISTEREDURL = amplify_core.QueryField(fieldName: "registeredUrl");
   static final IMAGES = amplify_core.QueryField(fieldName: "images");
   static final EXPIRAY = amplify_core.QueryField(fieldName: "expiray");
+  static final CREATEDAT = amplify_core.QueryField(fieldName: "createdAt");
   static var schema = amplify_core.Model.defineSchema(define: (amplify_core.ModelSchemaDefinition modelSchemaDefinition) {
     modelSchemaDefinition.name = "EventsModel";
     modelSchemaDefinition.pluralName = "EventsModels";
@@ -272,7 +301,17 @@ class EventsModel extends amplify_core.Model {
         ])
     ];
     
+    modelSchemaDefinition.indexes = [
+      amplify_core.ModelIndex(fields: const ["modelname", "createdAt"], name: "eventsModelsByModelnameAndCreatedAt")
+    ];
+    
     modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.id());
+    
+    modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.field(
+      key: EventsModel.MODELNAME,
+      isRequired: false,
+      ofType: amplify_core.ModelFieldType(amplify_core.ModelFieldTypeEnum.string)
+    ));
     
     modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.field(
       key: EventsModel.EVENTNAME,
@@ -317,11 +356,10 @@ class EventsModel extends amplify_core.Model {
       ofType: amplify_core.ModelFieldType(amplify_core.ModelFieldTypeEnum.timestamp)
     ));
     
-    modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.nonQueryField(
-      fieldName: 'createdAt',
-      isRequired: false,
-      isReadOnly: true,
-      ofType: amplify_core.ModelFieldType(amplify_core.ModelFieldTypeEnum.dateTime)
+    modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.field(
+      key: EventsModel.CREATEDAT,
+      isRequired: true,
+      ofType: amplify_core.ModelFieldType(amplify_core.ModelFieldTypeEnum.timestamp)
     ));
     
     modelSchemaDefinition.addField(amplify_core.ModelFieldDefinition.nonQueryField(

@@ -34,7 +34,7 @@ export 'onDutyModel.dart';
 
 class ModelProvider implements amplify_core.ModelProviderInterface {
   @override
-  String version = "7b31a03c7a2b6a1754a67833c1376ad4";
+  String version = "a6299786e3cb91b2bcea6b3de387ce95";
   @override
   List<amplify_core.ModelSchema> modelSchemas = [BannerImages.schema, EventsModel.schema, StaffUserProfile.schema, StudentsUserProfile.schema, onDutyModel.schema];
   @override
